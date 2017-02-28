@@ -25,10 +25,10 @@ Imports:
 	rvest (>= 0.3.2)
 License: MIT + file LICENSE
 Remotes: 
-    github::hadley/readr
+    github::hadley/readr,
 	github::hadley/dplyr@55d826c208caca729156f218825f334b68f986dc,
 	github::AkhilNairAmey/dbUpdateTable@147798aa7a48aa04c29afd9f6123d2c51c811ed6,
-	github::tidyverse/readxl@4a34a17fa6ae218256d48623fd46f90077a2156a
+	github::tidyverse/readxl@4a34a17fa6ae218256d48623fd46f90077a2156a,
     github::ropenscilabs/datapkg
 Encoding: UTF-8
 LazyData: true
