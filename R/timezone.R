@@ -45,7 +45,7 @@ set_timezone <- function(df, tz = "UTC", col_datetime = "DateTime") {
 change_timezone <- function(df, tz = "UTC", col_datetime = "DateTime",
                             debug = TRUE) {
   if (is_POSIXct(df[,col_datetime])) {
-    tz_org <- paste(unique(base::format((df[,col_datetime]), format="%Z")),collapse = " , ")
+    tz_org <- paste(unique(base::attr((df[,col_datetime]), "tzone")),collapse = " , ")
     if(debug) {print(sprintf("Changing original time zone(s) %s to %s",
           tz_org,
           tz))}
