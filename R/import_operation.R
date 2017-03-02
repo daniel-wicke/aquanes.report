@@ -85,27 +85,11 @@ tbl_tmp <- plyr::rbind.fill(tbl_live, tbl_india)
 
 duplicated_datetimes <- names(which(table(tbl_tmp$time) != 1))
 
-
-tbl_live <- left_join(tbl_live,
-                      tbl_india %>%
-                        dplyr::filter_(~time %in% duplicated_datetimes) %>%
-                        dplyr::select_(~time,
-                                       ~Redox_In,
-                                       ~Pressure1,
-                                       ~Pressure2,
-                                       ~DiffPressure,
-                                       ~H20Head))
-
-operation <- plyr::rbind.fill(tbl_live,
-                            tbl_india %>%
-                              filter_(!"time" %in% duplicated_datetimes))
-
-
-operation <- operation %>%
+operation <- tbl_tmp[!tbl_tmp$time %in% duplicated_datetimes,] %>%
              left_join(data.frame(AnlagenID = c(4013,4014),
                                    LocationName = rep("Haridwar",2))) %>%
              dplyr::rename_("DateTime" = "time") %>%
-             dplyr::mutate_(DateTime = "as.POSIXct(DateTime,tz = 'UTC')")
+             dplyr::mutate_("DateTime" = "as.POSIXct(DateTime,tz = 'UTC')")
 
 return(operation)
 }

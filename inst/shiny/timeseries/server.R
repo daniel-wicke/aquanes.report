@@ -42,7 +42,7 @@ shinyServer(function(input, output) {
 ts_data_xts <- reactive({
 
 
-  xts::xts(x = ts_data()[,-1],
+  xts::xts(x = ts_data()[,c(-1,-2)],
            order.by = ts_data()$DateTime,
            tzone = base::attr(ts_data()$DateTime,
                               "tzone"))
@@ -64,7 +64,9 @@ ts_data_xts <- reactive({
                                                      tz = input$timezone),
                                             as.POSIXct(input$daterange[2],
                                                        tz = input$timezone))) %>%
-             dyOptions(useDataTimezone = TRUE)
+             dyOptions(useDataTimezone = TRUE, 
+                       drawPoints = TRUE, 
+                       pointSize = 2)
   })
 
 })
