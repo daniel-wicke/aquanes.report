@@ -1,0 +1,29 @@
+---
+title: "Report"
+output:
+  html_document:
+    fig_width: 12
+    fig_height: 10
+params:
+  myDateRange: NA
+  myTimezone: NA
+  myData: NA
+---
+
+Here is the dygraph output from `r params$myDateRange[1]` to  `r params$myDateRange[2]` 
+using the timezone "`r params$myTimezone`".
+
+```{r, fig.width=12, fig.height=7, echo=FALSE}
+ dygraph(data = params$myData,
+           # main = unique(ts_data()$LocationName),
+                    ylab = "Parameter value") %>%
+             # dySeries("V1",
+             #          label = sprintf("%s (%s)",
+             #                          unique(ts_data()$ParameterName),
+             #                          unique(ts_data()$ParameterUnit))) %>%
+             dyLegend(show = "always", hideOnMouseOut = FALSE) %>%
+             dyRangeSelector(dateWindow = params$myDateRange) %>%
+             dyOptions(useDataTimezone = TRUE, 
+                       drawPoints = TRUE, 
+                       pointSize = 2)
+```
