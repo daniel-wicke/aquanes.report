@@ -59,7 +59,7 @@ analytics_4014 <- import_sheets(xlsPath = xlsPath,
 
 #### 2.1) Import
 
-operation <- import_operation(mysql_conf = file.path(dirname("global.R"), "my.cnf"))
+operation <- import_operation(mysql_conf = file.path(dirname("global.R"), ".my.cnf"))
 
 
 drop.cols <- c("DateTime", "AnlagenID", "LocationName", "id")
@@ -84,5 +84,5 @@ haridwar_raw_list <- plyr::rbind.fill(operation_list,
 
 haridwar_raw_list$SiteName[is.na(haridwar_raw_list$SiteName)] <- "Online"
 
-saveRDS("data/haridwar_raw_list.Rds")
+saveRDS(haridwar_raw_list, file = "data/haridwar_raw_list.Rds")
 }

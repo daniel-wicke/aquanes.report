@@ -23,7 +23,8 @@ Imports:
 	datapkg (>= 0.1.0),
 	xml2 (>= 1.1.0), 
 	rvest (>= 0.3.2),
-	shiny (>= 1.0.0)
+	shiny (>= 1.0.0),
+	dygraphs (>= 1.1.1.4)
 License: MIT + file LICENSE
 Remotes: 
     github::hadley/readr,

@@ -19,12 +19,14 @@ src_mysql_from_cnf <- function(dbname,
                       user=NULL,
                       password=NULL,
                       ...) {
+
+  dir <- normalizePath(dir)
   if(!(file.exists(dir))) {
     stop(sprintf("No such file '%s'",dir)) }
   dplyr::src_mysql(
     dbname,
     group = group,
-    default.file=path.expand(dir),
+    default.file = dir,
     # explicitly passing null unless otherwise specified.
     host = host,
     user = user,
