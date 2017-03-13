@@ -1,28 +1,28 @@
-ParameterCode,ParameterName,ParameterUnit,Comments
-Upv,Battery or PV Voltage,V,
-Rad,Irradiation,???,only given if sensor connected
-Redox_Out1,Redox outflow 1,mV,
-Redox_Out2,Redox outflow 2,mV,
-Flux,Flow rate ,L/h,
-Uz,Voltage at the Electrolysis cell,V,
-Iz,Current at the Electrolysis cell,A,
-Up,Voltage at the Pump,V,
-Ip,Current at the Pump,A,
-lv,Iv,A,
-modus,Setting of Modus Switches on internal PCB,,
-errcode,Error code,,
-err,err,,
-ext,Setting of Extra Switches on internal PCB,,
-maintenance,Maintenance mode,,"1 System is in operation, 0 System is in standby"
-Filterbetrieb,Filterbetrieb,,
-Filterpumpe,Filterpumpe,,
-Anlauf,Program phase,,Status of System (Status code list see below)
-BB,BB,??,
-CC,CC,??,
-err_sdcard,Error Sdcard,,
-err_modem,Error Modem,,
-Redox_In,Redox inflow,mV,
-Pressure1,Pressure 1,bar???,
-Pressure2,Pressure 2,bar???,
-DiffPressure,Pressure difference,bar???,
-H20Head,Water head,???,
+ParameterCode,ParameterName,ParameterUnit,Comments,SiteCode
+Upv,Battery or PV Voltage,V,,
+Rad,Irradiation,???,only given if sensor connected,
+Redox_Out1,Redox outflow 1,mV,,SP4
+Redox_Out2,Redox outflow 2,mV,,SP4
+Flux,Flow rate ,L/h,,SP1
+Uz,Voltage at the Electrolysis cell,V,,
+Iz,Current at the Electrolysis cell,A,,
+Up,Voltage at the Pump,V,,
+Ip,Current at the Pump,A,,
+lv,Iv,A,,
+modus,Setting of Modus Switches on internal PCB,,,
+errcode,Error code,,,
+err,err,,,
+ext,Setting of Extra Switches on internal PCB,,,
+maintenance,Maintenance mode,,"1 System is in operation, 0 System is in standby",
+Filterbetrieb,Filterbetrieb,,,
+Filterpumpe,Filterpumpe,,,
+Anlauf,Program phase,,Status of System (Status code list see below),
+BB,BB,??,,
+CC,CC,??,,
+err_sdcard,Error Sdcard,,,
+err_modem,Error Modem,,,
+Redox_In,Redox inflow,mV,,
+Pressure1,Pressure 1,bar???,,SP1
+Pressure2,Pressure 2,bar???,,SP2
+DiffPressure,Pressure difference,bar???,,
+H20Head,Water head,m,,SP4

@@ -9,15 +9,7 @@ library(shiny)
 
 shinyServer(function(input, output) {
 
-  output$dateRange <- renderUI({
-    dateRangeInput('daterange',
-                   label = 'Date range input: yyyy-mm-dd',
-                   start = as.Date(min(haridwar_raw_list$DateTime),tz = input$timezone),
-                   end = as.Date(max(haridwar_raw_list$DateTime),tz = input$timezone))
-  })
 
-
-  
   ts_tz <- reactive({ 
     aquanes.report::change_timezone(df = haridwar_raw_list,
                                     tz = input$timezone)
@@ -29,11 +21,12 @@ shinyServer(function(input, output) {
   #   ts_tz()[ts_tz()$ParameterCode == "errcode" & ts_tz()$ParameterValue != 0,]
   # })
   
-  ts_data <- reactive({
+  ts_data1 <- reactive({
 
-
-    row_idx <- ts_tz()[,"ParameterName"] %in%  input$parameter & ts_tz()[,"SiteName"] %in% input$sitename
-
+    date_idx <- as.Date(ts_tz()[,"DateTime"]) >= input$daterange[1] & as.Date(ts_tz()[,"DateTime"]) <= input$daterange[2]
+    site_idx <- ts_tz()[,"SiteName"] %in% input$sitename
+    para_idx <- ts_tz()[,"ParameterName"] %in%  input$parameter1
+    row_idx <- date_idx & site_idx & para_idx
     ts_tz()[row_idx, c("DateTime",
                                         "measurementID",
                                         "SiteName",
@@ -51,31 +44,58 @@ shinyServer(function(input, output) {
 
 
   })
+  
+  ts_data2 <- reactive({
+    
+    date_idx <- as.Date(ts_tz()[,"DateTime"]) >= input$daterange[1] & as.Date(ts_tz()[,"DateTime"]) <= input$daterange[2]
+    site_idx <- ts_tz()[,"SiteName"] %in% input$sitename
+    para_idx <- ts_tz()[,"ParameterName"] %in%  input$parameter2
+    row_idx <- date_idx & site_idx & para_idx
+    ts_tz()[row_idx, c("DateTime",
+                                  "measurementID",
+                                  "SiteName",
+                                  "ParameterName",
+                                  "ParameterUnit",
+                                  "ParameterValue")] %>%
+      dplyr::filter_("!is.na(ParameterValue)") %>%
+      dplyr::mutate_("SiteName_ParaName_Unit" = "sprintf('%s: %s (%s)', SiteName, ParameterName, ParameterUnit)")  %>%
+      dplyr::select_("DateTime",
+                     "measurementID",
+                     "SiteName_ParaName_Unit",
+                     "ParameterValue") %>%
+      tidyr::spread_(key_col = "SiteName_ParaName_Unit",
+                     value_col = "ParameterValue")
+    
+    
+  })
 
 
 
 
-ts_data_xts <- reactive({
+ts_data1_xts <- reactive({
 
 
-  xts::xts(x = ts_data()[,c(-1,-2)],
-           order.by = ts_data()$DateTime,
-           tzone = base::attr(ts_data()$DateTime,
+  xts::xts(x = ts_data1()[,c(-1,-2)],
+           order.by = ts_data1()$DateTime,
+           tzone = base::attr(ts_data1()$DateTime,
                               "tzone"))
 
   })
 
 
 
-  output$dygraph <- renderDygraph({
-    dygraph(data = ts_data_xts(),
+  output$dygraph1 <- renderDygraph({
+    dygraph(data = ts_data1_xts(),
+            group = "dy_group",
            # main = unique(ts_data()$LocationName),
                     ylab = "Parameter value") %>%
              # dySeries("V1",
              #          label = sprintf("%s (%s)",
              #                          unique(ts_data()$ParameterName),
              #                          unique(ts_data()$ParameterUnit))) %>%
-             dyLegend(show = "always", hideOnMouseOut = FALSE) %>%
+             dyLegend(show = "always", 
+                      hideOnMouseOut = FALSE,
+                      width = 900) %>%
              dyRangeSelector(dateWindow = input$daterange) %>%
              dyOptions(useDataTimezone = TRUE, 
                        drawPoints = TRUE, 
@@ -83,6 +103,40 @@ ts_data_xts <- reactive({
              # dyEvent(x = ts_errors()$DateTime, 
              #         label = ts_errors()$ParameterValue, 
              #         labelLoc = "bottom")
+  })
+  
+  
+  ts_data2_xts <- reactive({
+    
+    
+    xts::xts(x = ts_data2()[,c(-1,-2)],
+             order.by = ts_data2()$DateTime,
+             tzone = base::attr(ts_data2()$DateTime,
+                                "tzone"))
+    
+  })
+  
+  
+  
+  output$dygraph2 <- renderDygraph({
+    dygraph(data = ts_data2_xts(),
+            group = "dy_group",
+            # main = unique(ts_data()$LocationName),
+            ylab = "Parameter value") %>%
+      # dySeries("V1",
+      #          label = sprintf("%s (%s)",
+      #                          unique(ts_data()$ParameterName),
+      #                          unique(ts_data()$ParameterUnit))) %>%
+      dyLegend(show = "always", 
+               hideOnMouseOut = FALSE,
+               width = 900) %>%
+      dyRangeSelector(dateWindow = input$daterange) %>%
+      dyOptions(useDataTimezone = TRUE, 
+                drawPoints = TRUE, 
+                pointSize = 2) #%>% 
+    # dyEvent(x = ts_errors()$DateTime, 
+    #         label = ts_errors()$ParameterValue, 
+    #         labelLoc = "bottom")
   })
   
   output$report <- downloadHandler(
@@ -96,7 +150,8 @@ ts_data_xts <- reactive({
       file.copy("report/dygraph.Rmd", tempReport, overwrite = TRUE)
       
       # Set up parameters to pass to Rmd document
-      params <- list(myData = ts_data_xts(),
+      params <- list(myData1 = ts_data1_xts(),
+                     myData2 = ts_data2_xts(),
                      myDateRange = input$daterange,
                      myTimezone = input$timezone)
       

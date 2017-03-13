@@ -7,21 +7,43 @@ output:
 params:
   myDateRange: NA
   myTimezone: NA
-  myData: NA
+  myData1: NA
+  myData2: NA
 ---
 
 Here is the dygraph output from `r params$myDateRange[1]` to  `r params$myDateRange[2]` 
 using the timezone "`r params$myTimezone`".
 
 ```{r, fig.width=12, fig.height=7, echo=FALSE}
- dygraph(data = params$myData,
+ dygraph(data = params$myData1,
+         group = "dy_group",
            # main = unique(ts_data()$LocationName),
                     ylab = "Parameter value") %>%
              # dySeries("V1",
              #          label = sprintf("%s (%s)",
              #                          unique(ts_data()$ParameterName),
              #                          unique(ts_data()$ParameterUnit))) %>%
-             dyLegend(show = "always", hideOnMouseOut = FALSE) %>%
+             dyLegend(show = "always", 
+                      hideOnMouseOut = FALSE,
+                      width = 500) %>%
+             dyRangeSelector(dateWindow = params$myDateRange) %>%
+             dyOptions(useDataTimezone = TRUE, 
+                       drawPoints = TRUE, 
+                       pointSize = 2)
+```
+
+```{r, fig.width=12, fig.height=7, echo=FALSE}
+ dygraph(data = params$myData2,
+         group = "dy_group",
+           # main = unique(ts_data()$LocationName),
+                    ylab = "Parameter value") %>%
+             # dySeries("V1",
+             #          label = sprintf("%s (%s)",
+             #                          unique(ts_data()$ParameterName),
+             #                          unique(ts_data()$ParameterUnit))) %>%
+             dyLegend(show = "always", 
+                      hideOnMouseOut = FALSE,
+                      width = 500) %>%
              dyRangeSelector(dateWindow = params$myDateRange) %>%
              dyOptions(useDataTimezone = TRUE, 
                        drawPoints = TRUE, 
