@@ -46,6 +46,11 @@ change_timezone <- function(df, tz = "UTC", col_datetime = "DateTime",
                             debug = TRUE) {
   if (is_POSIXct(df[,col_datetime])) {
     tz_org <- paste(unique(base::attr((df[,col_datetime]), "tzone")),collapse = " , ")
+    if (tz_org == tz) {
+      if(debug) {print(sprintf("Original time zone(s) %s and new time zone %s are identical",
+                               tz_org,
+                               tz))}
+    } else if (tz_org != tz) {
     if(debug) {print(sprintf("Changing original time zone(s) %s to %s",
           tz_org,
           tz))}
@@ -54,7 +59,7 @@ change_timezone <- function(df, tz = "UTC", col_datetime = "DateTime",
     stop(sprintf("Column %s  needs to be of type DATE/TIME (POSIXct). Please check sheet 'xyz' of imported xls file 'xyz'!", col_datetime))
   }
   return(df)
-}
+}}
 
 
 #'Timezone: get valid time zones from Wikipedia
