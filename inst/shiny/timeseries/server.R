@@ -1,168 +1,152 @@
-library(dplyr)
-library(tidyr)
-library(dygraphs)
-library(xts)
-library(aquanes.report)
 library(shiny)
-#haridwar_raw_list <- readRDS("data/haridwar_raw_list.Rds")
+library(shinythemes)
+library(digest)
+library(metricsgraphics)
+library(leaflet)
+library(kwb.hantush)
+library(rmarkdown)
 
 
-shinyServer(function(input, output) {
+# By default, the file size limit is 5MB. It can be changed by
+# setting this option. Here we'll raise limit to 9MB.
+options(shiny.maxRequestSize = 9*1024^2)
 
 
-  ts_tz <- reactive({ 
-    aquanes.report::change_timezone(df = haridwar_raw_list,
-                                    tz = input$timezone)
-  })
+# Global settings (for all sessions)
+theme <<- shinytheme("readable")
+
+#Read user table
+userTable <<- read.csv(file = "tools/userTable.csv",
+                       header = TRUE,
+                       sep = ",")
+
+#theme <<- "bootstrap.css"
+
+# logo -------------------------------------------------------------------------
+logo <<- function
+(
+  src="kwb.png", 
+  target = "_blank", ### opens new tab/window 
+  href="http://www.kompetenz-wasser.de", 
+  align="middle", 
+  label = "KWB_homepage",
+  add_div = TRUE,
+  ... ### add. arguments passed to img(), e.g. height=40  
+) 
+{  
+  x <- a(
+    target = target, 
+    href = href,  
+    onclick = sprintf("ga('send', 'event', 'click', 'link', '%s', 1)", label),
+    img(src = src, align = align, ...)
+  )
   
+  if (add_div) {
+    x <- div(x)
+  }
   
-  # ts_errors <- reactive({
-  #   condi <- ts_tz()[, "ParameterCode"] == "errcode" & ts_tz()[,"ParameterValue"] != 0
-  #   ts_tz()[ts_tz()$ParameterCode == "errcode" & ts_tz()$ParameterValue != 0,]
-  # })
+  return(x)
+}
+
+# siteLogo ---------------------------------------------------------------------
+siteLogo <- logo(
+  src = "haridwar.jpg",
+  href = "http://www.aquanes-h2020.eu/Default.aspx?t=1668",
+  label = "Site5_Haridwar",
+  add_div = FALSE
+)
+
+# footer -----------------------------------------------------------------------
+footer <- function 
+(
+  startCol = 9, 
+  txt = "\u00A9 Kompetenzzentrum Wasser Berlin gGmbH 2017"
+)
+{
+  footerTxt <- tags$footer(tags$h6(txt))
+  x <- fixedRow(column(width = 12-startCol, footerTxt, offset = startCol))
   
-  ts_data1 <- reactive({
-
-    date_idx <- as.Date(ts_tz()[,"DateTime"]) >= input$daterange[1] & as.Date(ts_tz()[,"DateTime"]) <= input$daterange[2]
-    site_idx <- ts_tz()[,"SiteName"] %in% input$sitename
-    para_idx <- ts_tz()[,"ParameterName"] %in%  input$parameter1
-    row_idx <- date_idx & site_idx & para_idx
-    ts_tz()[row_idx, c("DateTime",
-                                        "measurementID",
-                                        "SiteName",
-                                        "ParameterName",
-                                        "ParameterUnit",
-                                        "ParameterValue")] %>%
-      dplyr::filter_("!is.na(ParameterValue)") %>%
-      dplyr::mutate_("SiteName_ParaName_Unit" = "sprintf('%s: %s (%s)', SiteName, ParameterName, ParameterUnit)")  %>%
-      dplyr::select_("DateTime",
-                     "measurementID",
-                     "SiteName_ParaName_Unit",
-                     "ParameterValue") %>%
-      tidyr::spread_(key_col = "SiteName_ParaName_Unit",
-                     value_col = "ParameterValue")
+  return(x)
+}
 
 
-  })
+# reference --------------------------------------------------------------------
+reference <- tabPanel("Reference", tags$div(siteLogo))
+
+# shinyServer ------------------------------------------------------------------
+shinyServer(function(input, output, session) {
+
+  # Local settings (for each session)  
+  # Tools ----
+  source("tools/login.R", local = TRUE)
   
-  ts_data2 <- reactive({
+  # Modules ----
+  source("module/timeSeries.R", local = TRUE)
+  source("module/kwb.R", local = TRUE)
+  # Data ----
+  #readRDS("data/haridwar_raw_list.Rds")
+  #Read user table
+  
+  # main page ----
+  output$mainPage <- renderUI({
     
-    date_idx <- as.Date(ts_tz()[,"DateTime"]) >= input$daterange[1] & as.Date(ts_tz()[,"DateTime"]) <= input$daterange[2]
-    site_idx <- ts_tz()[,"SiteName"] %in% input$sitename
-    para_idx <- ts_tz()[,"ParameterName"] %in%  input$parameter2
-    row_idx <- date_idx & site_idx & para_idx
-    ts_tz()[row_idx, c("DateTime",
-                                  "measurementID",
-                                  "SiteName",
-                                  "ParameterName",
-                                  "ParameterUnit",
-                                  "ParameterValue")] %>%
-      dplyr::filter_("!is.na(ParameterValue)") %>%
-      dplyr::mutate_("SiteName_ParaName_Unit" = "sprintf('%s: %s (%s)', SiteName, ParameterName, ParameterUnit)")  %>%
-      dplyr::select_("DateTime",
-                     "measurementID",
-                     "SiteName_ParaName_Unit",
-                     "ParameterValue") %>%
-      tidyr::spread_(key_col = "SiteName_ParaName_Unit",
-                     value_col = "ParameterValue")
+    doLogin()
     
-    
-  })
-
-
-
-
-ts_data1_xts <- reactive({
-
-
-  xts::xts(x = ts_data1()[,c(-1,-2)],
-           order.by = ts_data1()$DateTime,
-           tzone = base::attr(ts_data1()$DateTime,
-                              "tzone"))
-
-  })
-
-
-
-  output$dygraph1 <- renderDygraph({
-    dygraph(data = ts_data1_xts(),
-            group = "dy_group",
-           # main = unique(ts_data()$LocationName),
-                    ylab = "Parameter value") %>%
-             # dySeries("V1",
-             #          label = sprintf("%s (%s)",
-             #                          unique(ts_data()$ParameterName),
-             #                          unique(ts_data()$ParameterUnit))) %>%
-             dyLegend(show = "always", 
-                      hideOnMouseOut = FALSE,
-                      width = 900) %>%
-             dyRangeSelector(dateWindow = input$daterange) %>%
-             dyOptions(useDataTimezone = TRUE, 
-                       drawPoints = TRUE, 
-                       pointSize = 2) #%>% 
-             # dyEvent(x = ts_errors()$DateTime, 
-             #         label = ts_errors()$ParameterValue, 
-             #         labelLoc = "bottom")
-  })
-  
-  
-  ts_data2_xts <- reactive({
-    
-    
-    xts::xts(x = ts_data2()[,c(-1,-2)],
-             order.by = ts_data2()$DateTime,
-             tzone = base::attr(ts_data2()$DateTime,
-                                "tzone"))
-    
-  })
-  
-  
-  
-  output$dygraph2 <- renderDygraph({
-    dygraph(data = ts_data2_xts(),
-            group = "dy_group",
-            # main = unique(ts_data()$LocationName),
-            ylab = "Parameter value") %>%
-      # dySeries("V1",
-      #          label = sprintf("%s (%s)",
-      #                          unique(ts_data()$ParameterName),
-      #                          unique(ts_data()$ParameterUnit))) %>%
-      dyLegend(show = "always", 
-               hideOnMouseOut = FALSE,
-               width = 900) %>%
-      dyRangeSelector(dateWindow = input$daterange) %>%
-      dyOptions(useDataTimezone = TRUE, 
-                drawPoints = TRUE, 
-                pointSize = 2) #%>% 
-    # dyEvent(x = ts_errors()$DateTime, 
-    #         label = ts_errors()$ParameterValue, 
-    #         labelLoc = "bottom")
-  })
-  
-  output$report <- downloadHandler(
-    # For PDF output, change this to "report.pdf"
-    filename = "report.html",
-    content = function(file) {
-      # Copy the report file to a temporary directory before processing it, in
-      # case we don't have write permissions to the current working dir (which
-      # can happen when deployed).
-      tempReport <- file.path(tempdir(), "dygraph.Rmd")
-      file.copy("report/dygraph.Rmd", tempReport, overwrite = TRUE)
+    if (loginData$LoggedIn == TRUE) {
       
-      # Set up parameters to pass to Rmd document
-      params <- list(myData1 = ts_data1_xts(),
-                     myData2 = ts_data2_xts(),
-                     myDateRange = input$daterange,
-                     myTimezone = input$timezone)
+      doLogout()
       
-      # Knit the document, passing in the `params` list, and eval it in a
-      # child of the global environment (this isolates the code in the document
-      # from the code in this app).
-      rmarkdown::render(tempReport, output_file = file,
-                        params = params,
-                        envir = new.env(parent = globalenv())
+      server_timeSeries(input, output, session)
+      server_kwb(input, output)
+      
+      div(
+        class = "",
+        fluidPage(
+          fluidRow(column(12, column(4, br(), loginInfo()), br(), br(), logo(align = "right"))),
+          navbarPage(
+            title = "Interactive reporting",
+            windowTitle = "aquanes.reporting",
+            tabPanel(
+              "Explore", br(), 
+              div(class = " ", ui_timeSeries()), 
+              id = "timeSeries"
+            ),
+            tabPanel(
+              "Background", br(), 
+              div(class = " ", reference), 
+              # tags$iframe(src="http://www.aquanes-h2020.eu/Default.aspx?t=1668", 
+              #             height = 800, 
+              #             width = 1500, 
+              #             frameborder = 0, 
+              #             seamless = "seamless"),
+              id = "hintergrund"
+            ),
+            tabPanel(
+              "KWB", br(), 
+              div(class = " ", ui_kwb(output)),
+              id = "kwb"
+            ),
+            #navbarMenu("More",
+            #            reference,
+            #            ui_kwb(output)),
+            theme = theme,
+            footer = footer()
+          )
+        )
+      )
+    } else {
+      fluidPage(
+        fluidRow(
+          column(
+            1, offset = 5, 
+            br(), br(), br(), br(), 
+            h5("Login"), 
+            loginUI(), br()
+          )
+        ),
+        header = tags$style(type = "text/css", "well { width: 100%; }"),
+        theme = theme
       )
     }
-  )
-
+  })
 })
