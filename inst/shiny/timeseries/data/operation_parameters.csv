@@ -22,7 +22,7 @@ CC,CC,??,,
 err_sdcard,Error Sdcard,,,
 err_modem,Error Modem,,,
 Redox_In,Redox inflow,mV,,
-Pressure1,Pressure 1,bar???,,SP1
-Pressure2,Pressure 2,bar???,,SP2
-DiffPressure,Pressure difference,bar???,,
+Pressure1,Pressure 1,bar,,SP1
+Pressure2,Pressure 2,bar,,SP2
+DiffPressure,Pressure difference,bar,,
 H20Head,Water head,m,,SP4
