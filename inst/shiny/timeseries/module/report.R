@@ -30,11 +30,16 @@ ui_report <- function(...) {
         selectInput("report_sitenames", label = "Select sampling points",
                     choices = unique(haridwar_raw_list$SiteName),
                     multiple = TRUE,
-                    selected = unique(haridwar_raw_list$SiteName)[1]),
-        selectInput("report_parameters", label = "Select parameters",
-                    choices = unique(haridwar_raw_list$ParameterName),
+                    selected = unique(haridwar_raw_list$SiteName)),
+        h3("Select parameters"),
+        selectInput("report_parameters_online", label = "Online",
+                    choices = unique(haridwar_raw_list$ParameterName[haridwar_raw_list$Source == "online"]),
                     multiple = TRUE,
-                    selected = unique(haridwar_raw_list$ParameterName)[3]),
+                    selected = unique(haridwar_raw_list$ParameterName[haridwar_raw_list$Source == "online"])[3]),
+        selectInput("report_parameters_offline", label = "Offline",
+                    choices = unique(haridwar_raw_list$ParameterName[haridwar_raw_list$Source == "offline"]),
+                    multiple = TRUE,
+                    selected = unique(haridwar_raw_list$ParameterName[haridwar_raw_list$Source == "offline"])[1]),
         downloadButton("report_download", "Download report")#,
         # selectInput("dataset", "Choose a dataset to download:",
         #             choices = c("data_plot1", "data_plot2")),
@@ -44,9 +49,8 @@ ui_report <- function(...) {
         #                           id = "loadmessage"))
         ),
       mainPanel(
-        h1(textOutput("Report preview")),
+        h1("Report preview"),
         uiOutput("report_preview")
-
       )
       )
     )
@@ -67,7 +71,7 @@ server_report <- function(...) {
 
     date_idx <- as.Date(report_tz()[,"DateTime"]) >= input$report_daterange[1] & as.Date(report_tz()[,"DateTime"]) <= input$report_daterange[2]
     site_idx <- report_tz()[,"SiteName"] %in% input$report_sitenames
-    para_idx <- report_tz()[,"ParameterName"] %in%  input$report_parameters
+    para_idx <- report_tz()[,"ParameterName"] %in%  c(input$report_parameters_online, input$report_parameters_offline)
     row_idx <- date_idx & site_idx & para_idx
     report_tz()[row_idx, c("DateTime",
                            "measurementID",
@@ -98,14 +102,15 @@ server_report <- function(...) {
     params <- list(run_as_standalone = FALSE,
                    report_data = report_data(),
                    report_sitenames = input$report_sitenames,
-                   report_parameters = input$report_parameters,
+                   report_parameters_online = input$report_parameters_online,
+                   report_parameters_offline = input$report_parameters_offline,
                    report_daterange = input$report_daterange,
                    report_timezone = input$report_timezone)
 
     # Knit the document, passing in the `params` list, and eval it in a
     # child of the global environment (this isolates the code in the document
     # from the code in this app).
-    ofile <- file.path(tdir, "report.html")
+    ofile <- file.path(tdir, "automated_report.html")
     rmarkdown::render(tempReport,
                       output_file = ofile,
                       params = params,
@@ -119,7 +124,7 @@ server_report <- function(...) {
     includeHTML(create_report())
   )
 
-  output$report_download <- downloadHandler(filename = "report.html",
+  output$report_download <- downloadHandler(filename = "automated_report.html",
                                             content = function(file) {
                                               file.copy(from = create_report(),
                                                         to =  file)

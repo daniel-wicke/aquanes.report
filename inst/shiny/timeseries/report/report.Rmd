@@ -1,14 +1,17 @@
 ---
-title: "Report"
+title: "Automated report"
 output:
   html_document:
-    fig_width: 12
     fig_height: 10
+    fig_width: 12
+    number_sections: yes
+    toc: yes
 params:
   run_as_standalone: TRUE
   report_data: NA
   report_sitenames: NA
-  report_parameters: NA
+  report_parameters_online: NA
+  report_parameters_offline: NA
   report_daterange: NA
   report_timezone: NA
 ---
@@ -26,21 +29,23 @@ dat <- readRDS("C:/Users/mrustl/Desktop/Github_aquanes.report/trunk/inst/shiny/t
 
 
 input <- list(report_sitenames = unique(dat$SiteName),
-              report_parameters = unique(dat$ParameterName)[1:10],
+              report_parameters_online = unique(dat$ParameterName[dat$Source == "online"])[3],
+              report_parameters_offline = unique(dat$ParameterName[dat$Source == "offline"])[1],
               report_daterange = c("2016-09-01", "2016-09-30"),
               report_timezone = "UTC")
 
 
 date_idx <- as.Date(dat[,"DateTime"]) >= input$report_daterange[1] & as.Date(dat[,"DateTime"]) <= input$report_daterange[2]
 site_idx <- dat[,"SiteName"] %in% input$report_sitenames
-para_idx <- dat[,"ParameterName"] %in%  input$report_parameters
+para_idx <- dat[,"ParameterName"] %in% c(input$report_parameters_online, input$report_parameters_offline)
 row_idx <- date_idx & site_idx & para_idx
 
 
 config <- list(run_as_standalone = TRUE,
                report_data = aquanes.report::change_timezone(dat[row_idx,],tz = input$report_timezone), 
                report_sitenames = input$report_sitenames,
-               report_parameters = input$report_parameters,
+               report_parameters_online = input$report_parameters_online,
+               report_parameters_offline = input$report_parameters_offline,
                report_daterange = input$report_daterange,
                report_timezone = input$report_timezone
                )
@@ -48,20 +53,23 @@ config <- list(run_as_standalone = TRUE,
  config <- list(run_as_standalone = params$run_as_standalone,
                 report_data = params$report_data,
                 report_sitenames = params$report_sitenames,
-                report_parameters = params$report_parameters,
+                report_parameters_online = params$report_parameters_online,
+                report_parameters_offline = params$report_parameters_offline,
                 report_daterange = params$report_daterange,
                 report_timezone = params$report_timezone)
 }
 
 ```
 
-#General 
-Here is the ggplot2 output from `r config$report_daterange[1]` to  `r config$report_daterange[2]`
+#Time series
+Here is the time series plots from `r config$report_daterange[1]` to  `r config$report_daterange[2]`
 using the timezone "`r config$report_timezone`".
 
-**You selected the following `r length(config$report_parameters)` parameter(s) for plotting:**
 
-`r paste("* ", config$report_parameters,collapse = "  \n")`
+##Online parameters
+**You selected the following `r length(config$report_parameters_online)` parameter(s) for plotting:**
+
+`r paste("* ", config$report_parameters_online,collapse = "  \n")`
 
 
 **At the following `r length(config$report_sitenames)` sampling location(s):**
@@ -72,9 +80,11 @@ using the timezone "`r config$report_timezone`".
 
 ```{r, fig.width=12, fig.height=7, echo=FALSE}
 
-    for (i in seq_along(unique(config$report_data[,"ParameterName"]))) {
+   online <- config$report_data[config$report_data[,"ParameterName"] %in% config$report_parameters_online,]
+
+    for (i in seq_along(config$report_parameters_online)) {
     
-    g1 <- ggplot2::ggplot(config$report_data, ggplot2::aes_string(x = "DateTime",
+    g1 <- ggplot2::ggplot(online, ggplot2::aes_string(x = "DateTime",
                                     y = "ParameterValue",
                                     col = "SiteName")) +
       ggforce::facet_wrap_paginate("sprintf('%s (%s)',ParameterName, ParameterUnit)",
@@ -89,3 +99,36 @@ using the timezone "`r config$report_timezone`".
     }
 ```
 
+##Offline parameters
+
+**You selected the following `r length(config$report_parameters_offline)` parameter(s) for plotting:**
+
+`r paste("* ", config$report_parameters_offline,collapse = "  \n")`
+
+
+**At the following `r length(config$report_sitenames)` sampling location(s):**
+
+`r paste("* ", config$report_sitenames,collapse = "  \n")`
+
+
+
+```{r, fig.width=12, fig.height=7, echo=FALSE}
+
+   offline <- config$report_data[config$report_data[,"ParameterName"] %in% config$report_parameters_offline,]
+
+    for (i in seq_along(config$report_parameters_offline)) {
+    
+    g2 <- ggplot2::ggplot(offline, ggplot2::aes_string(x = "DateTime",
+                                    y = "ParameterValue",
+                                    col = "SiteName")) +
+      ggforce::facet_wrap_paginate("sprintf('%s (%s)',ParameterName, ParameterUnit)",
+                                   nrow = 1,
+                                   ncol = 1,
+                                   scales = "free_y",
+                                   page = i) +
+      ggplot2::geom_point() +
+      ggplot2::theme_bw() +
+      ggplot2::theme(legend.position = "top")
+     print(g2) 
+    }
+```
