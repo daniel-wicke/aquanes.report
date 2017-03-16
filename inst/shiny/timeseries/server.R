@@ -94,7 +94,7 @@ shinyServer(function(input, output, session) {
     
     doLogin()
     
-    if (loginData$LoggedIn == FALSE) {
+    if (loginData$LoggedIn == TRUE) {
       
       doLogout()
       

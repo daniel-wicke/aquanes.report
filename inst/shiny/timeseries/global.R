@@ -85,9 +85,9 @@ haridwar_raw_list <- plyr::rbind.fill(operation_list,
 
 haridwar_raw_list$DataType <- "raw"
 
-drop.cols <- c("id", "AnlagenID", "Who", "Comments", "SiteCode", "ParameterCode", "localTime", "LocationName", "LocationID")
+drop.cols <- c("id", "AnlagenID", "Who", "Comments","localTime", "LocationName", "LocationID")
 
-haridwar_raw_list  <- haridwar_raw_list[,dplyr::setdiff(names(haridwar_raw_list),drop.cols)]  %>% 
+haridwar_raw_list  <- haridwar_raw_list[,dplyr::setdiff(names(haridwar_raw_list),drop.cols)]  %>%
                       dplyr::filter_("!is.na(ParameterValue)")
 
 haridwar_raw_list$SiteName[is.na(haridwar_raw_list$SiteName)] <- "Online"

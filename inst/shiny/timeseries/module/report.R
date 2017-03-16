@@ -34,8 +34,8 @@ ui_report <- function(...) {
         selectInput("report_parameters", label = "Select parameters",
                     choices = unique(haridwar_raw_list$ParameterName),
                     multiple = TRUE,
-                    selected = unique(haridwar_raw_list$ParameterName)[3])#,
-        #downloadButton("report_download", "Download report")#,
+                    selected = unique(haridwar_raw_list$ParameterName)[3]),
+        downloadButton("report_download", "Download report")#,
         # selectInput("dataset", "Choose a dataset to download:",
         #             choices = c("data_plot1", "data_plot2")),
         # downloadButton('downloadData', 'Download data'),
@@ -46,6 +46,7 @@ ui_report <- function(...) {
       mainPanel(
         h1(textOutput("Report preview")),
         uiOutput("report_preview")
+
       )
       )
     )
@@ -86,7 +87,7 @@ server_report <- function(...) {
   })
 
 
-  output$report_preview <- renderUI({
+  create_report <- reactive({
     tdir <- tempdir()
     tempReport <- file.path(tdir, "report.Rmd")
     file.copy(from = "report/report.Rmd",
@@ -109,8 +110,20 @@ server_report <- function(...) {
                       output_file = ofile,
                       params = params,
                       envir = new.env(parent = globalenv()))
-    includeHTML(ofile)
+    #includeHTML(ofile)
+    ofile
   })
+
+
+  output$report_preview <- renderUI(
+    includeHTML(create_report())
+  )
+
+  output$report_download <- downloadHandler(filename = "report.html",
+                                            content = function(file) {
+                                              file.copy(from = create_report(),
+                                                        to =  file)
+                                              })
 
 
 
