@@ -6,6 +6,7 @@ library(dplyr)
 library(readxl)
 library(tidyr)
 
+
 #setwd(dir = "C:/Users/mrustl/Desktop/wc_aquanes")
 
 ###############################################################################
@@ -59,10 +60,10 @@ analytics_4014 <- import_sheets(xlsPath = xlsPath,
 
 #### 2.1) Import
 
-operation <- import_operation(mysql_conf = file.path(dirname("global.R"), ".my.cnf"))
+operation <- import_operation()
 
 
-drop.cols <- c("DateTime", "AnlagenID", "LocationName", "id")
+drop.cols <- c("DateTime", "AnlagenID", "LocationName", "id", "localTime")
 
 operation_list <- operation %>%
   tidyr::gather_(key_col = "ParameterCode",
@@ -81,6 +82,13 @@ operation_list <- operation_list %>%
 haridwar_raw_list <- plyr::rbind.fill(operation_list,
                                       analytics_4014 %>%
                                       dplyr::mutate_(Source = "as.character('offline')"))
+
+haridwar_raw_list$DataType <- "raw"
+
+drop.cols <- c("id", "AnlagenID", "Who", "Comments", "SiteCode", "ParameterCode", "localTime", "LocationName", "LocationID")
+
+haridwar_raw_list  <- haridwar_raw_list[,dplyr::setdiff(names(haridwar_raw_list),drop.cols)]  %>% 
+                      dplyr::filter_("!is.na(ParameterValue)")
 
 haridwar_raw_list$SiteName[is.na(haridwar_raw_list$SiteName)] <- "Online"
 

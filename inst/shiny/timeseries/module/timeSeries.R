@@ -6,10 +6,6 @@ library(aquanes.report)
 library(shiny)
 library(dygraphs)
 library(ggplot2)
-#haridwar_raw_list <- readRDS("data/haridwar_raw_list.Rds")
-
-
-#haridwar_raw_list <- readRDS("data/haridwar_raw_list.Rds")
 
 server_timeSeries <- function(...) {
 
@@ -27,6 +23,13 @@ server_timeSeries <- function(...) {
   
   ts_data1 <- reactive({
 
+    
+    # input <- list(timezone = "UTC", 
+    #               daterange = c("2016-09-05","2016-10-05"),
+    #               sitename = unique(haridwar_raw_list$SiteName), 
+    #               parameter1 = unique(haridwar_raw_list$ParameterName)[1])
+    
+    
     date_idx <- as.Date(ts_tz()[,"DateTime"]) >= input$daterange[1] & as.Date(ts_tz()[,"DateTime"]) <= input$daterange[2]
     site_idx <- ts_tz()[,"SiteName"] %in% input$sitename
     para_idx <- ts_tz()[,"ParameterName"] %in%  input$parameter1
@@ -79,7 +82,7 @@ server_timeSeries <- function(...) {
 ts_data1_xts <- reactive({
 
 
-  xts::xts(x = ts_data1()[,c(-1,-2)],
+  xts::xts(x = ts_data1()[,c(-1,-2), drop = FALSE],
            order.by = ts_data1()$DateTime,
            tzone = base::attr(ts_data1()$DateTime,
                               "tzone"))
@@ -113,7 +116,7 @@ ts_data1_xts <- reactive({
   ts_data2_xts <- reactive({
     
     
-    xts::xts(x = ts_data2()[,c(-1,-2)],
+    xts::xts(x = ts_data2()[,c(-1,-2), drop = FALSE],
              order.by = ts_data2()$DateTime,
              tzone = base::attr(ts_data2()$DateTime,
                                 "tzone"))
@@ -143,6 +146,8 @@ ts_data1_xts <- reactive({
     #         labelLoc = "bottom")
   })
   
+  
+
   output$report <- downloadHandler(
     # For PDF output, change this to "report.pdf"
     filename = "report.html",
@@ -239,10 +244,10 @@ ui_timeSeries <- function(...) {
                                 id = "loadmessage"))
     ),
     mainPanel(
-      dygraphOutput("dygraph1"),
-      h1(textOutput("")),
-      h1(textOutput("")),
-      dygraphOutput("dygraph2")
+       dygraphOutput("dygraph1"),
+       h1(textOutput("")),
+       h1(textOutput("")),
+       dygraphOutput("dygraph2")
     )
   )
 )

@@ -1,11 +1,12 @@
 library(shiny)
 library(shinythemes)
 library(digest)
-library(metricsgraphics)
+#library(metricsgraphics)
 library(leaflet)
 library(kwb.hantush)
 library(rmarkdown)
-
+library(ggplot2)
+library(ggforce)
 
 # By default, the file size limit is 5MB. It can be changed by
 # setting this option. Here we'll raise limit to 9MB.
@@ -13,7 +14,7 @@ options(shiny.maxRequestSize = 9*1024^2)
 
 
 # Global settings (for all sessions)
-theme <<- shinytheme("readable")
+my_theme <<- shinytheme("readable")
 
 #Read user table
 userTable <<- read.csv(file = "tools/userTable.csv",
@@ -82,6 +83,7 @@ shinyServer(function(input, output, session) {
   
   # Modules ----
   source("module/timeSeries.R", local = TRUE)
+  source("module/report.R", local = TRUE)
   source("module/kwb.R", local = TRUE)
   # Data ----
   #readRDS("data/haridwar_raw_list.Rds")
@@ -92,11 +94,12 @@ shinyServer(function(input, output, session) {
     
     doLogin()
     
-    if (loginData$LoggedIn == TRUE) {
+    if (loginData$LoggedIn == FALSE) {
       
       doLogout()
       
       server_timeSeries(input, output, session)
+      server_report(input, output, session)
       server_kwb(input, output)
       
       div(
@@ -111,6 +114,10 @@ shinyServer(function(input, output, session) {
               div(class = " ", ui_timeSeries()), 
               id = "timeSeries"
             ),
+            tabPanel(
+              "Report", br(), 
+              div(class = " ", ui_report()), 
+              id = "report"),
             tabPanel(
               "Background", br(), 
               div(class = " ", reference), 
@@ -129,7 +136,7 @@ shinyServer(function(input, output, session) {
             #navbarMenu("More",
             #            reference,
             #            ui_kwb(output)),
-            theme = theme,
+            theme = my_theme,
             footer = footer()
           )
         )
@@ -145,7 +152,7 @@ shinyServer(function(input, output, session) {
           )
         ),
         header = tags$style(type = "text/css", "well { width: 100%; }"),
-        theme = theme
+        theme = my_theme
       )
     }
   })
