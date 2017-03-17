@@ -1,6 +1,6 @@
-haridwar_raw_list <- readRDS("data/haridwar_raw_list.Rds")
+use_live_data <- FALSE
 
-if (FALSE) {
+if (use_live_data) {
 library(aquanes.report)
 library(dplyr)
 library(readxl)
@@ -60,7 +60,7 @@ analytics_4014 <- import_sheets(xlsPath = xlsPath,
 
 #### 2.1) Import
 
-operation <- import_operation()
+operation <- import_operation(mysql_conf = ".my.cnf")
 
 
 drop.cols <- c("DateTime", "AnlagenID", "LocationName", "id", "localTime")
@@ -93,4 +93,6 @@ haridwar_raw_list  <- haridwar_raw_list[,dplyr::setdiff(names(haridwar_raw_list)
 haridwar_raw_list$SiteName[is.na(haridwar_raw_list$SiteName)] <- "Online"
 
 saveRDS(haridwar_raw_list, file = "data/haridwar_raw_list.Rds")
+} else {
+  haridwar_raw_list <- readRDS("data/haridwar_raw_list.Rds")
 }

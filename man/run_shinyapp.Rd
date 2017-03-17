@@ -4,10 +4,13 @@
 \alias{run_shinyapp}
 \title{Runs Shiny App}
 \usage{
-run_shinyapp(appName = "timeseries", launch.browser = TRUE, ...)
+run_shinyapp(appName = "timeseries", use_live_data = FALSE,
+  launch.browser = TRUE, ...)
 }
 \arguments{
 \item{appName}{name of shiny app (default: "visualise")}
+
+\item{use_live_data}{should live data be used (default: FALSE)}
 
 \item{launch.browser}{If true, the system's default web browser will be
 launched automatically after the app is started (default: TRUE)}
