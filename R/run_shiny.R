@@ -1,12 +1,12 @@
-#'Runs Shiny App
-#'@param appName name of shiny app (default: "visualise")
+#'Runs Shiny app for an AQUANES site
+#'@param siteName site name for shiny app (default: "haridwar")
 #'@param use_live_data should live data be used (default: FALSE)
 #'@param launch.browser If true, the system's default web browser will be
 #'launched automatically after the app is started (default: TRUE)
 #'@param ... further arguments passed to shiny::runApp()
 #'@importFrom shiny runApp
 #'@export
-run_shinyapp <- function(appName = "timeseries",
+run_shinyapp <- function(siteName = "haridwar",
                          use_live_data = FALSE,
                          launch.browser = TRUE,
                          ...) {
@@ -15,13 +15,13 @@ run_shinyapp <- function(appName = "timeseries",
   use_live_data <- toupper(use_live_data)
 
   shinyDir <- system.file("shiny", package = "aquanes.report")
-  appDir <- file.path(shinyDir, appName)
+  appDir <- file.path(shinyDir, siteName)
 
 
-  if (!appName %in% dir(shinyDir)) {
+  if (!siteName %in% dir(shinyDir)) {
     msg <- sprintf("Could not find shiny app directory for %s.\n
-                    Please select for parameter 'appName' one of:\n'%s'",
-                    appName,
+                    Please select for parameter 'siteName' one of:\n'%s'",
+                    siteName,
                     paste(dir(shinyDir), collapse = ", "))
 
     stop(msg, call. = FALSE)

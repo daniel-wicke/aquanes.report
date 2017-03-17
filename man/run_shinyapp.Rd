@@ -2,13 +2,13 @@
 % Please edit documentation in R/run_shiny.R
 \name{run_shinyapp}
 \alias{run_shinyapp}
-\title{Runs Shiny App}
+\title{Runs Shiny app for an AQUANES site}
 \usage{
-run_shinyapp(appName = "timeseries", use_live_data = FALSE,
+run_shinyapp(siteName = "haridwar", use_live_data = FALSE,
   launch.browser = TRUE, ...)
 }
 \arguments{
-\item{appName}{name of shiny app (default: "visualise")}
+\item{siteName}{site name for shiny app (default: "haridwar")}
 
 \item{use_live_data}{should live data be used (default: FALSE)}
 
@@ -18,5 +18,5 @@ launched automatically after the app is started (default: TRUE)}
 \item{...}{further arguments passed to shiny::runApp()}
 }
 \description{
-Runs Shiny App
+Runs Shiny app for an AQUANES site
 }
