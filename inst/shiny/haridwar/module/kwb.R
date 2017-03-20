@@ -1,11 +1,10 @@
-#library(leaflet)
 
 map_kwb <- function (zoom) {
-  leaflet() %>% 
-      addTiles() %>%  
-      setView( lng = 13.301067, lat = 52.491697, zoom = zoom) %>% 
-      addPopups(lng = 13.301067, 
-          lat = 52.491697, 
+    leaflet::leaflet() %>%
+    leaflet::addTiles() %>%
+    leaflet::setView( lng = 13.301067, lat = 52.491697, zoom = zoom) %>%
+    leaflet::addPopups(lng = 13.301067,
+          lat = 52.491697,
           'You can find us here:<br><b>Kompetenzzentrum Wasser Berlin gGmbH</b>
           <br>Address: Cicerostrasse 24, 10709 Berlin (Germany)<br>
            <a href="http://www.kompetenz-wasser.de">http://www.kompetenz-wasser.de</a>')
@@ -20,7 +19,7 @@ map_kwb <- function (zoom) {
 # }
 
 ui_kwb <- function (output) {
-tabPanel("KWB", 
+tabPanel("KWB",
          leafletOutput("kwbMap_world"),
          br(),
          leafletOutput("kwbMap_local"))

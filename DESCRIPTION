@@ -1,7 +1,7 @@
 Package: aquanes.report
 Type: Package
 Title: Automated Reporting Tool for Water Suppliers
-Version: 0.1.9999
+Version: 0.1.0
 Author: Michael Rustler
 Maintainer: Michael Rustler <michael.rustler@kompetenz-wasser.det>
 Description: Collects, aggregates and visualises operational and 
@@ -24,7 +24,11 @@ Imports:
 	xml2 (>= 1.1.0), 
 	rvest (>= 0.3.2),
 	shiny (>= 1.0.0),
-	dygraphs (>= 1.1.1.4)
+	shinythemes (>= 1.1.1),
+	dygraphs (>= 1.1.1.4),
+	digest (>= 0.6.11),
+	leaflet (>= 1.1.0),
+	rmarkdown (>= 1.3)
 License: MIT + file LICENSE
 Remotes: 
     github::hadley/readr,

@@ -1,12 +1,15 @@
 library(shiny)
 library(shinythemes)
 library(digest)
-#library(metricsgraphics)
 library(leaflet)
-library(kwb.hantush)
 library(rmarkdown)
 library(ggplot2)
 library(ggforce)
+library(dplyr)
+library(tidyr)
+library(dygraphs)
+library(xts)
+library(aquanes.report)
 
 # By default, the file size limit is 5MB. It can be changed by
 # setting this option. Here we'll raise limit to 9MB.
@@ -16,36 +19,41 @@ options(shiny.maxRequestSize = 9*1024^2)
 # Global settings (for all sessions)
 my_theme <<- shinytheme("readable")
 
-#Read user table
-userTable <<- read.csv(file = "tools/userTable.csv",
-                       header = TRUE,
-                       sep = ",")
+
+#Read user table for deployment from user table
+exists_userTable <- file.exists("tools/userTable.csv")
+
+if (exists_userTable) {
+  userTable <<- read.csv(file = "tools/userTable.csv",
+                         header = TRUE,
+                         sep = ",")
+}
 
 #theme <<- "bootstrap.css"
 
 # logo -------------------------------------------------------------------------
 logo <<- function
 (
-  src="kwb.png", 
-  target = "_blank", ### opens new tab/window 
-  href="http://www.kompetenz-wasser.de", 
-  align="middle", 
+  src="kwb.png",
+  target = "_blank", ### opens new tab/window
+  href="http://www.kompetenz-wasser.de",
+  align="middle",
   label = "KWB_homepage",
   add_div = TRUE,
-  ... ### add. arguments passed to img(), e.g. height=40  
-) 
-{  
+  ... ### add. arguments passed to img(), e.g. height=40
+)
+{
   x <- a(
-    target = target, 
-    href = href,  
+    target = target,
+    href = href,
     onclick = sprintf("ga('send', 'event', 'click', 'link', '%s', 1)", label),
     img(src = src, align = align, ...)
   )
-  
+
   if (add_div) {
     x <- div(x)
   }
-  
+
   return(x)
 }
 
@@ -58,15 +66,15 @@ siteLogo <- logo(
 )
 
 # footer -----------------------------------------------------------------------
-footer <- function 
+footer <- function
 (
-  startCol = 9, 
+  startCol = 9,
   txt = "\u00A9 Kompetenzzentrum Wasser Berlin gGmbH 2017"
 )
 {
   footerTxt <- tags$footer(tags$h6(txt))
   x <- fixedRow(column(width = 12-startCol, footerTxt, offset = startCol))
-  
+
   return(x)
 }
 
@@ -77,10 +85,10 @@ reference <- tabPanel("Reference", tags$div(siteLogo))
 # shinyServer ------------------------------------------------------------------
 shinyServer(function(input, output, session) {
 
-  # Local settings (for each session)  
+  # Local settings (for each session)
   # Tools ----
   source("tools/login.R", local = TRUE)
-  
+
   # Modules ----
   source("module/timeSeries.R", local = TRUE)
   source("module/report.R", local = TRUE)
@@ -88,20 +96,20 @@ shinyServer(function(input, output, session) {
   # Data ----
   #readRDS("data/haridwar_raw_list.Rds")
   #Read user table
-  
+
   # main page ----
   output$mainPage <- renderUI({
-    
+
     doLogin()
-    
-    if (loginData$LoggedIn == TRUE) {
-      
+
+    if (loginData$LoggedIn == exists_userTable) {
+
       doLogout()
-      
+
       server_timeSeries(input, output, session)
       server_report(input, output, session)
       server_kwb(input, output)
-      
+
       div(
         class = "",
         fluidPage(
@@ -110,26 +118,26 @@ shinyServer(function(input, output, session) {
             title = "Interactive reporting",
             windowTitle = "aquanes.reporting",
             tabPanel(
-              "Explore", br(), 
-              div(class = " ", ui_timeSeries()), 
+              "Explore", br(),
+              div(class = " ", ui_timeSeries()),
               id = "timeSeries"
             ),
             tabPanel(
-              "Report", br(), 
-              div(class = " ", ui_report()), 
+              "Report", br(),
+              div(class = " ", ui_report()),
               id = "report"),
             tabPanel(
-              "Background", br(), 
-              div(class = " ", reference), 
-              # tags$iframe(src="http://www.aquanes-h2020.eu/Default.aspx?t=1668", 
-              #             height = 800, 
-              #             width = 1500, 
-              #             frameborder = 0, 
+              "Background", br(),
+              div(class = " ", reference),
+              # tags$iframe(src="http://www.aquanes-h2020.eu/Default.aspx?t=1668",
+              #             height = 800,
+              #             width = 1500,
+              #             frameborder = 0,
               #             seamless = "seamless"),
               id = "hintergrund"
             ),
             tabPanel(
-              "KWB", br(), 
+              "KWB", br(),
               div(class = " ", ui_kwb(output)),
               id = "kwb"
             ),
@@ -145,9 +153,9 @@ shinyServer(function(input, output, session) {
       fluidPage(
         fluidRow(
           column(
-            1, offset = 5, 
-            br(), br(), br(), br(), 
-            h5("Login"), 
+            1, offset = 5,
+            br(), br(), br(), br(),
+            h5("Login"),
             loginUI(), br()
           )
         ),
