@@ -9,6 +9,7 @@ output:
 params:
   run_as_standalone: TRUE
   report_data: NA
+  report_aggregation: "day"
   report_sitenames: NA
   report_parameters_online: NA
   report_parameters_offline: NA
@@ -25,7 +26,7 @@ library(aquanes.report)
 if (params$run_as_standalone) {
   
 ### Raw data
-dat <- readRDS("C:/Users/mrustl/Desktop/Github_aquanes.report/trunk/inst/shiny/timeseries/data/haridwar_raw_list.Rds")
+dat <- aquanes.report::import_data_haridwar()
 
 
 input <- list(report_sitenames = unique(dat$SiteName),
@@ -33,6 +34,13 @@ input <- list(report_sitenames = unique(dat$SiteName),
               report_parameters_offline = unique(dat$ParameterName[dat$Source == "offline"])[1],
               report_daterange = c("2016-09-01", "2016-09-30"),
               report_timezone = "UTC")
+
+### Aggregate to user defined time period
+
+if (params$report_aggregation != "raw") {
+dat <- aquanes.report::group_datetime(dat,
+                                      by = params$report_aggregation)
+}
 
 
 date_idx <- as.Date(dat[,"DateTime"]) >= input$report_daterange[1] & as.Date(dat[,"DateTime"]) <= input$report_daterange[2]
