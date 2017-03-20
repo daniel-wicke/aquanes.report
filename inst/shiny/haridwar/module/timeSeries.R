@@ -5,6 +5,18 @@ server_timeSeries <- function(...) {
     aquanes.report::change_timezone(df = haridwar_raw_list,
                                     tz = input$timezone)
   })
+  
+  
+  ts_tz_agg <- reactive({
+    
+    if(input$temporal_aggregation != "raw") {
+    aquanes.report::group_datetime(df = ts_tz(),
+                                   by = input$temporal_aggregation)
+    } else {
+      ts_tz()
+    }
+    
+  })
 
 
   # ts_errors <- reactive({
@@ -21,11 +33,11 @@ server_timeSeries <- function(...) {
     #               parameter1 = unique(haridwar_raw_list$ParameterName)[1])
 
 
-    date_idx <- as.Date(ts_tz()[,"DateTime"]) >= input$daterange[1] & as.Date(ts_tz()[,"DateTime"]) <= input$daterange[2]
-    site_idx <- ts_tz()[,"SiteName"] %in% input$sitename
-    para_idx <- ts_tz()[,"ParameterName"] %in%  input$parameter1
+    date_idx <- as.Date(ts_tz_agg()[,"DateTime"]) >= input$daterange[1] & as.Date(ts_tz_agg()[,"DateTime"]) <= input$daterange[2]
+    site_idx <- ts_tz_agg()[,"SiteName"] %in% input$sitename
+    para_idx <- ts_tz_agg()[,"ParameterName"] %in%  input$parameter1
     row_idx <- date_idx & site_idx & para_idx
-    ts_tz()[row_idx, c("DateTime",
+    ts_tz_agg()[row_idx, c("DateTime",
                                         "measurementID",
                                         "SiteName",
                                         "ParameterName",
@@ -45,11 +57,11 @@ server_timeSeries <- function(...) {
 
   ts_data2 <- reactive({
 
-    date_idx <- as.Date(ts_tz()[,"DateTime"]) >= input$daterange[1] & as.Date(ts_tz()[,"DateTime"]) <= input$daterange[2]
-    site_idx <- ts_tz()[,"SiteName"] %in% input$sitename
-    para_idx <- ts_tz()[,"ParameterName"] %in%  input$parameter2
+    date_idx <- as.Date(ts_tz_agg()[,"DateTime"]) >= input$daterange[1] & as.Date(ts_tz_agg()[,"DateTime"]) <= input$daterange[2]
+    site_idx <- ts_tz_agg()[,"SiteName"] %in% input$sitename
+    para_idx <- ts_tz_agg()[,"ParameterName"] %in%  input$parameter2
     row_idx <- date_idx & site_idx & para_idx
-    ts_tz()[row_idx, c("DateTime",
+    ts_tz_agg()[row_idx, c("DateTime",
                                   "measurementID",
                                   "SiteName",
                                   "ParameterName",
@@ -210,6 +222,9 @@ ui_timeSeries <- function(...) {
       selectInput("timezone", label = "Select a timezone",
                   choices = aquanes.report::get_valid_timezones()$TZ.,
                   selected = "UTC"),
+      selectInput("temporal_aggregation", label = "Select temporal aggregation",
+                  choices = c("raw", "minute", "hour", "day", "month", "year"),
+                  selected = "day"),
       dateRangeInput('daterange',
                      label = 'Date range input: yyyy-mm-dd',
                      start = "2016-09-05",
