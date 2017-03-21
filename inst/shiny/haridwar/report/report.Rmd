@@ -30,6 +30,7 @@ dat <- aquanes.report::import_data_haridwar()
 
 
 input <- list(report_sitenames = unique(dat$SiteName),
+              report_aggregation = "day",
               report_parameters_online = unique(dat$ParameterName[dat$Source == "online"])[3],
               report_parameters_offline = unique(dat$ParameterName[dat$Source == "offline"])[1],
               report_daterange = c("2016-09-01", "2016-09-30"),
@@ -51,6 +52,7 @@ row_idx <- date_idx & site_idx & para_idx
 
 config <- list(run_as_standalone = TRUE,
                report_data = aquanes.report::change_timezone(dat[row_idx,],tz = input$report_timezone), 
+               report_aggregation = input$report_aggregation,
                report_sitenames = input$report_sitenames,
                report_parameters_online = input$report_parameters_online,
                report_parameters_offline = input$report_parameters_offline,
@@ -58,8 +60,12 @@ config <- list(run_as_standalone = TRUE,
                report_timezone = input$report_timezone
                )
 } else {
+  
+
+  
  config <- list(run_as_standalone = params$run_as_standalone,
                 report_data = params$report_data,
+                report_aggregation = params$report_aggregation,
                 report_sitenames = params$report_sitenames,
                 report_parameters_online = params$report_parameters_online,
                 report_parameters_offline = params$report_parameters_offline,

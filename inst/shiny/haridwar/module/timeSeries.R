@@ -5,17 +5,17 @@ server_timeSeries <- function(...) {
     aquanes.report::change_timezone(df = haridwar_raw_list,
                                     tz = input$timezone)
   })
-  
-  
+
+
   ts_tz_agg <- reactive({
-    
+
     if(input$temporal_aggregation != "raw") {
     aquanes.report::group_datetime(df = ts_tz(),
                                    by = input$temporal_aggregation)
     } else {
       ts_tz()
     }
-    
+
   })
 
 
@@ -223,8 +223,8 @@ ui_timeSeries <- function(...) {
                   choices = aquanes.report::get_valid_timezones()$TZ.,
                   selected = "UTC"),
       selectInput("temporal_aggregation", label = "Select temporal aggregation",
-                  choices = c("raw", "minute", "hour", "day", "month", "year"),
-                  selected = "day"),
+                  choices = c("raw", "hour", "day", "month"),
+                  selected = "raw"),
       dateRangeInput('daterange',
                      label = 'Date range input: yyyy-mm-dd',
                      start = "2016-09-05",

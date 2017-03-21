@@ -23,6 +23,9 @@ ui_report <- function(...) {
         selectInput("report_timezone", label = "Select a timezone",
                     choices = aquanes.report::get_valid_timezones()$TZ.,
                     selected = "UTC"),
+        selectInput("report_aggregation", label = "Select temporal aggregation",
+                    choices = c("raw", "hour", "day", "month"),
+                    selected = "raw"),
         dateRangeInput('report_daterange',
                        label = 'Date range input: yyyy-mm-dd',
                        start = "2016-09-01",
@@ -78,7 +81,8 @@ server_report <- function(...) {
                            "SiteName",
                            "ParameterName",
                            "ParameterUnit",
-                           "ParameterValue")] %>%
+                           "ParameterValue",
+                           "DataType")] %>%
       dplyr::filter_("!is.na(ParameterValue)") %>%
       # dplyr::mutate_("ParaName_Unit" = "sprintf('%s (%s)', ParameterName, ParameterUnit)")  %>%
       dplyr::select_("DateTime",
@@ -86,8 +90,23 @@ server_report <- function(...) {
                      "SiteName",
                      "ParameterName",
                      "ParameterUnit",
-                     "ParameterValue")
+                     "ParameterValue",
+                     "DataType")
 
+  })
+
+
+  report_data_agg <- reactive({
+
+
+    if (input$report_aggregation != "raw") {
+      res <- aquanes.report::group_datetime(df = report_data(),
+                                     by = input$report_aggregation,
+                                     fun = "median")
+    } else {
+      res <- report_data()
+    }
+   return(res)
   })
 
 
@@ -100,7 +119,8 @@ server_report <- function(...) {
 
     # Set up parameters to pass to Rmd document
     params <- list(run_as_standalone = FALSE,
-                   report_data = report_data(),
+                   report_data = report_data_agg(),
+                   report_aggregation = input$report_aggregation,
                    report_sitenames = input$report_sitenames,
                    report_parameters_online = input$report_parameters_online,
                    report_parameters_offline = input$report_parameters_offline,

@@ -83,6 +83,13 @@ analytics_4014 <- import_sheets(xlsPath = xlsPath,
                                 sheets_analytics = analytics_to_import)
 
 
+drop.cols <- c("Who", "Comments", "LocationName", "LocationID")
+select.cols <- dplyr::setdiff(names(analytics_4014),drop.cols)
+
+analytics_4014   <- analytics_4014[,select.cols] %>%
+                    dplyr::filter_("!is.na(ParameterValue)") %>%
+                    dplyr::mutate_(Source = "as.character('offline')")
+
 
 ###############################################################################
 #### 2) Operational data
@@ -99,34 +106,44 @@ operation <- import_operation(mysql_conf = operation_mySQL_conf)
 
 if (debug) print("### Step 3: Standardise analytics & operational data ##########################")
 
-drop.cols <- c("DateTime", "AnlagenID", "LocationName", "id", "localTime")
+drop.cols <- c("AnlagenID", "LocationName", "id", "localTime")
 
-operation_list <- tidyr::gather_(data =  operation,
+select.cols <- dplyr::setdiff(names(operation),drop.cols)
+
+operation <- operation[,select.cols]
+
+operation_list <- tidyr::gather_(data = operation,
                                  key_col = "ParameterCode",
-                 value_col = "ParameterValue",
-                 gather_cols = dplyr::setdiff(names(operation),drop.cols))
+                                 value_col = "ParameterValue",
+                                 gather_cols = dplyr::setdiff(names(operation),"DateTime")) %>%
+                  dplyr::filter_("!is.na(ParameterValue)")
+
+
+
+sites_meta <- analytics_4014 %>%
+  group_by_(~SiteCode, ~SiteName) %>%
+  summarise_(n = "n()") %>%
+  select_(~SiteCode, ~SiteName)
+
 
 operation_para_names <- utils::read.csv(file = operation_meta_path,
-                                        stringsAsFactors = FALSE )
+                                        stringsAsFactors = FALSE ) %>%
+                        dplyr::select_(.dots = dplyr::setdiff(names(.),"Comments")) %>%
+                        left_join(sites_meta)
+
+
+operation_para_names$SiteName[is.na(operation_para_names$SiteName)] <- "General"
 
 
 operation_list <- operation_list %>%
-  dplyr::left_join(operation_para_names) %>%
-  dplyr::mutate_(Source = "as.character('online')")
+                  dplyr::left_join(operation_para_names) %>%
+                  dplyr::mutate_(Source = "as.character('online')",
+                                 DataType = "as.character('raw')")
 
 
-haridwar_raw_list <- plyr::rbind.fill(operation_list,
-                                      analytics_4014 %>%
-                                        dplyr::mutate_(Source = "as.character('offline')"))
 
-haridwar_raw_list$DataType <- "raw"
 
-drop.cols <- c("id", "AnlagenID", "Who", "Comments","localTime", "LocationName", "LocationID")
-
-haridwar_raw_list  <- haridwar_raw_list[,dplyr::setdiff(names(haridwar_raw_list),drop.cols)]  %>%
-  dplyr::filter_("!is.na(ParameterValue)")
-
-haridwar_raw_list$SiteName[is.na(haridwar_raw_list$SiteName)] <- "Online"
+haridwar_raw_list <- plyr::rbind.fill(operation_list, analytics_4014)
 
 return(haridwar_raw_list)
 }
