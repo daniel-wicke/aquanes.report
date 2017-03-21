@@ -92,6 +92,7 @@ shinyServer(function(input, output, session) {
   # Modules ----
   source("module/timeSeries.R", local = TRUE)
   source("module/report.R", local = TRUE)
+  source("module/site.R", local = TRUE)
   source("module/kwb.R", local = TRUE)
   # Data ----
   #readRDS("data/haridwar_raw_list.Rds")
@@ -108,6 +109,7 @@ shinyServer(function(input, output, session) {
 
       server_timeSeries(input, output, session)
       server_report(input, output, session)
+      server_site(input, output)
       server_kwb(input, output)
 
       div(
@@ -135,6 +137,11 @@ shinyServer(function(input, output, session) {
               #             frameborder = 0,
               #             seamless = "seamless"),
               id = "hintergrund"
+            ),
+            tabPanel(
+              "Site", br(),
+              div(class = " ", ui_site(output)),
+              id = "site"
             ),
             tabPanel(
               "KWB", br(),
