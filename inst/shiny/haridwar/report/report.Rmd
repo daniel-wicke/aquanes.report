@@ -1,5 +1,19 @@
 ---
 title: "Automated report for Haridwar"
+output:
+  html_document:
+    fig_height: 7
+    fig_width: 12
+    number_sections: yes
+    toc: yes
+  pdf_document:
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+  word_document:
+    fig_height: 5
+    fig_width: 7
+    toc: yes
 params:
   report_aggregation: day
   report_data: NA
@@ -9,20 +23,6 @@ params:
   report_sitenames: NA
   report_timezone: NA
   run_as_standalone: yes
-output:
-  pdf_document:
-    highlight: zenburn
-    number_sections: yes
-    toc: yes
-  html_document:
-    fig_height: 7
-    fig_width: 12
-    number_sections: yes
-    toc: yes
-  word_document:
-    fig_height: 5
-    fig_width: 7
-    toc: yes
 ---
 
 ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
