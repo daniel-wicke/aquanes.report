@@ -36,13 +36,29 @@ if (params$run_as_standalone) {
 ### Raw data
 dat <- aquanes.report::import_data_haridwar()
 
+conf_template <- aquanes.report::report_config_template(df = dat,
+                                       temporal_aggregation = "raw", 
+                                       output_timezone = "Asia/Calcutta")
+aquanes.report::report_config_to_txt(config_list = conf_template, "report_config_template.txt")
 
+report_config_path <- file.path(getwd(), "report_config.txt")
+
+if (file.exists(report_config_path)) {
+
+### Import & use report configuration from "report_config.txt"
+input <- aquanes.report::report_txt_to_config(report_config_path)
+  
+} else {
+ 
+### Set a dummy configuration in case no "report_config.txt" exists 
 input <- list(report_sitenames = unique(dat$SiteName),
               report_aggregation = "day",
               report_parameters_online = unique(dat$ParameterName[dat$Source == "online"])[3],
               report_parameters_offline = unique(dat$ParameterName[dat$Source == "offline"])[1],
               report_daterange = c("2017-03-01", "2017-03-31"),
               report_timezone = "UTC")
+
+}
 
 ### Aggregate to user defined time period
 
@@ -85,7 +101,8 @@ config <- list(run_as_standalone = TRUE,
 
 #Time series
 Here is the time series plots from `r config$report_daterange[1]` to  `r config$report_daterange[2]`
-using the timezone "`r config$report_timezone`".
+using the timezone "`r config$report_timezone`" with the following temporal aggregation 
+level (i.e. median values): "`r config$report_aggregation`"
 
 
 ##Online parameters
