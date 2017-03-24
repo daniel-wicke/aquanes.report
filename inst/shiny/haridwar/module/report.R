@@ -5,21 +5,6 @@ ui_report <- function(...) {
 
     sidebarLayout(
       sidebarPanel(
-#         tags$head(tags$style(type="text/css", "
-#                              #loadmessage {
-#                              position: fixed;
-#                              top: 0px;
-#                              left: 0px;
-#                              width: 100%;
-#                              padding: 5px 0px 5px 0px;
-#                              text-align: center;
-#                              font-weight: bold;
-#                              font-size: 100%;
-#                              color: #000000;
-#                              background-color: #CCFF66;
-#                              z-index: 105;
-# }
-# ")),
         selectInput("report_timezone", label = "Select a timezone",
                     choices = aquanes.report::get_valid_timezones()$TZ.,
                     selected = "UTC"),
@@ -45,17 +30,12 @@ ui_report <- function(...) {
                     selected = unique(haridwar_raw_list$ParameterName[haridwar_raw_list$Source == "offline"])[1]),
         radioButtons("report_format", "Report format", c("HTML", "PDF", "Word"),
                       inline = TRUE),
-        downloadButton("report_download", "Generate & download report")#,
-        # selectInput("dataset", "Choose a dataset to download:",
-        #             choices = c("data_plot1", "data_plot2")),
-        # downloadButton('downloadData', 'Download data'),
-        # conditionalPanel(condition = "$('html').hasClass('shiny-busy')",
-        #                  tags$div("Loading... (this may take ~ 1 minute)",
-        #                           id = "loadmessage"))
-        ),
+        downloadButton("report_download", "Generate & download report"),
+        downloadButton("report_zip", "Download standalone report (zip)")),
       mainPanel(
-        h1("Report preview"),
-        uiOutput("report_preview")
+        #h1("Report preview"),
+        #downloadButton("report_zip", "Download report zip"),
+        htmlOutput("report_preview")
       )
       )
     )
@@ -110,6 +90,54 @@ server_report <- function(...) {
     }
    return(res)
   })
+
+
+  output$report_zip <- downloadHandler(
+    filename = function() {
+      datetime <- format(Sys.time(), format = "%Y%m%d%H%M%S")
+      paste("report_", datetime, ".zip", sep = "")
+    },
+
+    content = function(zfile) {
+      tdir <- tempdir()
+
+      #Copy report
+      reportName <- "report.Rmd"
+      tempReport_path <- file.path(tdir, reportName)
+      file.copy(from = file.path("report", reportName),
+                to = tempReport_path,
+                overwrite = TRUE)
+
+      #conf_list <- aquanes.report::report_config_template()
+
+      # Set up config parameters & save in text file
+      conf_list <- list(report_sitenames = input$report_sitenames,
+                        report_aggregation = input$report_aggregation,
+                        report_parameters_online = input$report_parameters_online,
+                        report_parameters_offline = input$report_parameters_offline,
+                        report_daterange = input$report_daterange,
+                        report_timezone = input$report_timezone)
+
+      conf_name <- "report_config.txt"
+      conf_file <- file.path(tdir, conf_name)
+
+      aquanes.report::report_config_to_txt(config_list = conf_list,
+                                           output_file = conf_file)
+
+
+      dir.old <- setwd(tdir)
+      on.exit(setwd(dir.old))
+
+
+      #cat(tdir, file = stderr())
+      zip(zipfile = zfile,
+          files = c(reportName, conf_name))
+
+    },
+    contentType = "application/zip")
+
+
+
 
 
   create_report <- reactive({
