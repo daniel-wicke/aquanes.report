@@ -2,22 +2,19 @@
 % Please edit documentation in R/report_configuration.R
 \name{report_txt_to_config}
 \alias{report_txt_to_config}
-\title{Report config: saves config to text file}
+\title{Report config: imports text file to list}
 \usage{
 report_txt_to_config(config_txt = "report_config.txt")
 }
 \arguments{
-\item{config_list}{a report configuration list e.g. as retrieved by
-report_config_template()}
-
-\item{output_file}{absolute or relative path of where to save output file
-(default: "report_config.txt")}
+\item{config_txt}{path to report configuration text file created by 
+a report configuration list e.g. as retrieved by function report_config_to_txt()}
 }
 \value{
 saves report configuration list as text file
 }
 \description{
-Report config: saves config to text file
+Report config: imports text file to list
 }
 \examples{
 \dontrun{

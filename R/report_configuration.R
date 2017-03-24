@@ -76,11 +76,9 @@ for (i in seq_along(config_list)) {
 }
 }
 
-#'Report config: saves config to text file
-#' @param config_list a report configuration list e.g. as retrieved by
-#' report_config_template()
-#' @param output_file absolute or relative path of where to save output file
-#' (default: "report_config.txt")
+#'Report config: imports text file to list
+#' @param config_txt path to report configuration text file created by 
+#' a report configuration list e.g. as retrieved by function report_config_to_txt()
 #' @return saves report configuration list as text file
 #' @export
 #' @examples

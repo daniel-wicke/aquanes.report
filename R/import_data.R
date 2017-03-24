@@ -127,8 +127,9 @@ sites_meta <- analytics_4014 %>%
 
 
 operation_para_names <- utils::read.csv(file = operation_meta_path,
-                                        stringsAsFactors = FALSE ) %>%
-                        dplyr::select_(.dots = dplyr::setdiff(names(.),"Comments")) %>%
+                                        stringsAsFactors = FALSE ) 
+
+operation_para_names <- dplyr::select_(.dots = dplyr::setdiff(names(operation_para_names),"Comments")) %>%
                         left_join(sites_meta)
 
 
