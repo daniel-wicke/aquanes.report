@@ -65,6 +65,10 @@ report_config_to_txt <- function(config_list,
 if (file.exists(output_file)) {
   file.remove(output_file)
 }
+
+if (!dir.exists(dirname(output_file))) {
+  dir.create(path = dirname(output_file), showWarnings = FALSE)
+}
 #z <- deparse(substitute(config_list))
 #cat(z, "\n", file=output_file)
 nams <- names(config_list)
@@ -77,7 +81,7 @@ for (i in seq_along(config_list)) {
 }
 
 #'Report config: imports text file to list
-#' @param config_txt path to report configuration text file created by 
+#' @param config_txt path to report configuration text file created by
 #' a report configuration list e.g. as retrieved by function report_config_to_txt()
 #' @return saves report configuration list as text file
 #' @export

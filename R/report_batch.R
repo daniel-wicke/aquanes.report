@@ -29,17 +29,26 @@ write_report <- function(rmd_name = "report.Rmd",
 #' @param batchName name for report batch file(default: "create_report.bat")
 #' @param report_path (default: NULL)
 #' @param report_config_path (default: NULL)
+#' @param open_in_explorer open batchDir in Windows explorer (default: TRUE).
+#' Only working on a Windows system!
 #' @export
 create_report_batch <- function(batchDir = file.path(tempdir(), "batch_report"),
                                 batchName = "create_report.bat",
                                 report_path = NULL,
-                                report_config_path = NULL) {
+                                report_config_path = NULL,
+                                open_in_explorer = TRUE) {
 
 
-  batchDir <- gsub(pattern = "\\\\", replacement = "/", batchDir)
+ batchDir <- gsub(pattern = "\\\\", replacement = .Platform$file.sep, batchDir)
 
 
-if (dir.exists(batchDir) == FALSE) dir.create(batchDir,showWarnings = FALSE)
+if (dir.exists(batchDir) == FALSE) {
+  dir.create(batchDir,showWarnings = FALSE)
+}
+
+owdir <- setwd(batchDir)
+on.exit(owdir)
+
 
 if (is.null(report_path)) {
   report_path <- system.file("shiny/haridwar/report/report.Rmd",
@@ -62,14 +71,10 @@ write_report(rmd_name = report_name,
 if (!is.null(report_config_path)) {
   if (file.exists(report_config_path)) {
     file.copy(from = report_config_path,
-              to = file.path(batchDir, "input", basename(report_config_path)),
+              to = file.path(batchDir, "input", "report_config.txt"),
               overwrite = TRUE)
    }
 }
-
-
-dir.create(path = file.path(batchDir, "output"),
-           showWarnings = FALSE)
 
 
 
@@ -104,4 +109,10 @@ batch_path <- file.path(batchDir, batchName)
 
 writeLines(batch_text, con = batch_path)
 print(paste("Batch file & data structure created at:", normalizePath(batch_path)))
+  if (open_in_explorer & .Platform$OS.type == "windows") {
+    shell(paste("explorer", normalizePath(batchDir)))
+  }
+
+created_files <- list.files(getwd(),recursive = TRUE)
+return(created_files)
 }

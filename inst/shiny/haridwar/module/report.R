@@ -101,12 +101,6 @@ server_report <- function(...) {
     content = function(zfile) {
       tdir <- tempdir()
 
-      #Copy report
-      reportName <- "report.Rmd"
-      tempReport_path <- file.path(tdir, reportName)
-      file.copy(from = file.path("report", reportName),
-                to = tempReport_path,
-                overwrite = TRUE)
 
       #conf_list <- aquanes.report::report_config_template()
 
@@ -125,13 +119,20 @@ server_report <- function(...) {
                                            output_file = conf_file)
 
 
-      dir.old <- setwd(tdir)
-      on.exit(setwd(dir.old))
+      batchDir <- file.path(tdir, "batch")
+      reportPath <- file.path(getwd(), "report/report.Rmd")
+      files_to_zip <- create_report_batch(batchDir = batchDir,
+                                          report_path = reportPath,
+                                          report_config_path = conf_file,
+                                          open_in_explorer = FALSE)
+
+      dir.old <- setwd(batchDir)
+      on.exit(dir.old)
 
 
       #cat(tdir, file = stderr())
       zip(zipfile = zfile,
-          files = c(reportName, conf_name))
+          files = files_to_zip)
 
     },
     contentType = "application/zip")

@@ -7,7 +7,7 @@
 report_txt_to_config(config_txt = "report_config.txt")
 }
 \arguments{
-\item{config_txt}{path to report configuration text file created by 
+\item{config_txt}{path to report configuration text file created by
 a report configuration list e.g. as retrieved by function report_config_to_txt()}
 }
 \value{

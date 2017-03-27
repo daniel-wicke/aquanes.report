@@ -6,7 +6,7 @@
 \usage{
 create_report_batch(batchDir = file.path(tempdir(), "batch_report"),
   batchName = "create_report.bat", report_path = NULL,
-  report_config_path = NULL)
+  report_config_path = NULL, open_in_explorer = TRUE)
 }
 \arguments{
 \item{batchDir}{path to report batch directory (default: tempdir())}
@@ -16,6 +16,9 @@ create_report_batch(batchDir = file.path(tempdir(), "batch_report"),
 \item{report_path}{(default: NULL)}
 
 \item{report_config_path}{(default: NULL)}
+
+\item{open_in_explorer}{open batchDir in Windows explorer (default: TRUE).
+Only working on a Windows system!}
 }
 \description{
 Report batch: creates batch file for report
