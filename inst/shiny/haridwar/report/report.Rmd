@@ -26,6 +26,7 @@ params:
 ---
 
 ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+library(RMySQL)
 library(ggplot2)
 library(ggforce)
 library(aquanes.report)
