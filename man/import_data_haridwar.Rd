@@ -5,8 +5,7 @@
 \title{Imports Haridwar data}
 \usage{
 import_data_haridwar(analytics_path = system.file(file.path("shiny",
-  "haridwar/data/161101Monitoring_AquaNES_4014_Haridwar_KWB.xlsx"), package =
-  "aquanes.report"),
+  "haridwar/data/analytics.xlsx"), package = "aquanes.report"),
   operation_mySQL_conf = system.file("shiny/haridwar/.my.cnf", package =
   "aquanes.report"),
   operation_meta_path = system.file(file.path("shiny/haridwar/data",

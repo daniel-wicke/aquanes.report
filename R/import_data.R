@@ -18,7 +18,7 @@
 #' @export
 
 import_data_haridwar <- function(analytics_path = system.file(file.path("shiny",
-  "haridwar/data/161101Monitoring_AquaNES_4014_Haridwar_KWB.xlsx"),
+  "haridwar/data/analytics.xlsx"),
   package = "aquanes.report"),
   operation_mySQL_conf = system.file("shiny/haridwar/.my.cnf",
                                       package = "aquanes.report"),

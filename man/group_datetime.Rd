@@ -8,9 +8,7 @@ group_datetime(df, by = "day", fun = "median", col_datetime = "DateTime",
   col_datatype = "DataType")
 }
 \arguments{
-\item{df}{a data frame as retrieved by import_data_haridwar()
-(default: system.file("shiny/haridwar/data/161101Monitoring_AquaNES_4014_Haridwar_KWB.xlsx",
-package = "aquanes.report"))}
+\item{df}{a data frame as retrieved by import_data_haridwar()}
 
 \item{by}{an aggregation time step of "year", "month", "day", "hour", "minute"
 (default: "day)}

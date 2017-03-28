@@ -5,7 +5,7 @@ if (use_live_data) {
 library(aquanes.report)
 
 analytics <- file.path(getwd(),
-                       "data/161101Monitoring_AquaNES_4014_Haridwar_KWB.xlsx")
+                       "data/analytics.xlsx")
 
 mySQL <- file.path(getwd(),
                    ".my.cnf")

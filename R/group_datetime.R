@@ -1,7 +1,5 @@
 #'Group DateTime by user defined period (year, month, day, hour, minute)
 #' @param df a data frame as retrieved by import_data_haridwar()
-#' (default: system.file("shiny/haridwar/data/161101Monitoring_AquaNES_4014_Haridwar_KWB.xlsx",
-#' package = "aquanes.report"))
 #' @param by an aggregation time step of "year", "month", "day", "hour", "minute"
 #' (default: "day)
 #' @param fun function to be used for grouping measurement data of column ParameterValue
