@@ -5,34 +5,35 @@ ui_report <- function(...) {
 
     sidebarLayout(
       sidebarPanel(
-        selectInput("report_timezone", label = "Select a timezone",
-                    choices = aquanes.report::get_valid_timezones()$TZ.,
-                    selected = "UTC"),
         selectInput("report_aggregation", label = "Select temporal aggregation",
-                    choices = c("raw", "hour", "day", "month"),
-                    selected = "raw"),
+                    choices = c("raw", "10min", "hour", "day", "month"),
+                    selected = "10min"),
+        selectInput("report_timezone", label = "Select a timezone",
+                    choices = c("UTC", "Asia/Calcutta"), #aquanes.report::get_valid_timezones()$TZ.,
+                    selected = "UTC"),
         dateRangeInput('report_daterange',
                        label = 'Date range input: yyyy-mm-dd',
                        start = "2016-09-01",
                        end = "2016-10-30"),
         selectInput("report_sitenames", label = "Select sampling points",
-                    choices = unique(haridwar_raw_list$SiteName),
+                    choices = unique(haridwar_10min_list$SiteName),
                     multiple = TRUE,
-                    selected = unique(haridwar_raw_list$SiteName)),
+                    selected = unique(haridwar_10min_list$SiteName)),
         h3("Select parameters"),
         selectInput("report_parameters_online", label = "Online",
-                    choices = unique(haridwar_raw_list$ParameterName[haridwar_raw_list$Source == "online"]),
+                    choices = unique(haridwar_10min_list$ParameterName[haridwar_10min_list$Source == "online"]),
                     multiple = TRUE,
-                    selected = unique(haridwar_raw_list$ParameterName[haridwar_raw_list$Source == "online"])[3]),
+                    selected = unique(haridwar_10min_list$ParameterName[haridwar_10min_list$Source == "online"])[16]),
         selectInput("report_parameters_offline", label = "Offline",
-                    choices = unique(haridwar_raw_list$ParameterName[haridwar_raw_list$Source == "offline"]),
+                    choices = unique(haridwar_10min_list$ParameterName[haridwar_10min_list$Source == "offline"]),
                     multiple = TRUE,
-                    selected = unique(haridwar_raw_list$ParameterName[haridwar_raw_list$Source == "offline"])[1]),
+                    selected = unique(haridwar_10min_list$ParameterName[haridwar_10min_list$Source == "offline"])[1]),
         radioButtons("report_format", "Report format", c("HTML", "PDF", "Word"),
                       inline = TRUE),
         downloadButton("report_download", "Generate & download report"),
         downloadButton("report_zip", "Download standalone report (zip)")),
       mainPanel(
+        actionButton("report_preview_update", "Update report preview"),
         #h1("Report preview"),
         #downloadButton("report_zip", "Download report zip"),
         htmlOutput("report_preview")
@@ -44,8 +45,24 @@ ui_report <- function(...) {
 server_report <- function(...) {
 
 
+  report_agg <- reactive({
+
+    object_name <- sprintf("haridwar_%s_list", input$report_aggregation)
+
+    if (exists(object_name)) {
+      get(object_name)
+    } else {
+      dat <- readRDS(sprintf("data/%s.Rds", object_name))
+      assign(x = object_name,
+             value = dat)
+      dat
+    }
+
+  })
+
+
   report_tz <- reactive({
-    aquanes.report::change_timezone(df = haridwar_raw_list,
+    aquanes.report::change_timezone(df = report_agg(),
                                     tz = input$report_timezone)
   })
 
@@ -77,19 +94,6 @@ server_report <- function(...) {
 
   })
 
-
-  report_data_agg <- reactive({
-
-
-    if (input$report_aggregation != "raw") {
-      res <- aquanes.report::group_datetime(df = report_data(),
-                                     by = input$report_aggregation,
-                                     fun = "median")
-    } else {
-      res <- report_data()
-    }
-   return(res)
-  })
 
 
   output$report_zip <- downloadHandler(
@@ -141,7 +145,8 @@ server_report <- function(...) {
 
 
 
-  create_report <- reactive({
+  create_report <- eventReactive(eventExpr = input$report_preview_update,
+                                 valueExpr = {
     tdir <- tempdir()
     tempReport <- file.path(tdir, "report.Rmd")
     file.copy(from = "report/report.Rmd",
@@ -150,7 +155,7 @@ server_report <- function(...) {
 
     # Set up parameters to pass to Rmd document
     params <- list(run_as_standalone = FALSE,
-                   report_data = report_data_agg(),
+                   report_data = report_data(),
                    report_aggregation = input$report_aggregation,
                    report_sitenames = input$report_sitenames,
                    report_parameters_online = input$report_parameters_online,
@@ -204,7 +209,7 @@ server_report <- function(...) {
 
       # Set up parameters to pass to Rmd document
       params <- list(run_as_standalone = FALSE,
-                     report_data = report_data_agg(),
+                     report_data = report_data(),
                      report_aggregation = input$report_aggregation,
                      report_sitenames = input$report_sitenames,
                      report_parameters_online = input$report_parameters_online,

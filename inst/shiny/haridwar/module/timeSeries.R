@@ -1,22 +1,28 @@
 server_timeSeries <- function(...) {
 
 
-  ts_tz <- reactive({
-    aquanes.report::change_timezone(df = haridwar_raw_list,
-                                    tz = input$timezone)
-  })
+  ts_agg <- reactive({
 
+    object_name <- sprintf("haridwar_%s_list", input$temporal_aggregation)
 
-  ts_tz_agg <- reactive({
-
-    if(input$temporal_aggregation != "raw") {
-    aquanes.report::group_datetime(df = ts_tz(),
-                                   by = input$temporal_aggregation)
+    if (exists(object_name)) {
+      get(object_name)
     } else {
-      ts_tz()
+      dat <- readRDS(sprintf("data/%s.Rds", object_name))
+      assign(x = object_name,
+             value = dat)
+      dat
     }
 
   })
+
+
+
+  ts_tz <- reactive({
+    aquanes.report::change_timezone(df = ts_agg(),
+                                    tz = input$timezone)
+  })
+
 
 
   # ts_errors <- reactive({
@@ -27,17 +33,11 @@ server_timeSeries <- function(...) {
   ts_data1 <- reactive({
 
 
-    # input <- list(timezone = "UTC",
-    #               daterange = c("2016-09-05","2016-10-05"),
-    #               sitename = unique(haridwar_raw_list$SiteName),
-    #               parameter1 = unique(haridwar_raw_list$ParameterName)[1])
-
-
-    date_idx <- as.Date(ts_tz_agg()[,"DateTime"]) >= input$daterange[1] & as.Date(ts_tz_agg()[,"DateTime"]) <= input$daterange[2]
-    site_idx <- ts_tz_agg()[,"SiteName"] %in% input$sitename
-    para_idx <- ts_tz_agg()[,"ParameterName"] %in%  input$parameter1
+    date_idx <- as.Date(ts_tz()[,"DateTime"]) >= input$daterange[1] & as.Date(ts_tz()[,"DateTime"]) <= input$daterange[2]
+    site_idx <- ts_tz()[,"SiteName"] %in% input$sitename
+    para_idx <- ts_tz()[,"ParameterName"] %in%  input$parameter1
     row_idx <- date_idx & site_idx & para_idx
-    ts_tz_agg()[row_idx, c("DateTime",
+    ts_tz()[row_idx, c("DateTime",
                                         "measurementID",
                                         "SiteName",
                                         "ParameterName",
@@ -57,11 +57,11 @@ server_timeSeries <- function(...) {
 
   ts_data2 <- reactive({
 
-    date_idx <- as.Date(ts_tz_agg()[,"DateTime"]) >= input$daterange[1] & as.Date(ts_tz_agg()[,"DateTime"]) <= input$daterange[2]
-    site_idx <- ts_tz_agg()[,"SiteName"] %in% input$sitename
-    para_idx <- ts_tz_agg()[,"ParameterName"] %in%  input$parameter2
+    date_idx <- as.Date(ts_tz()[,"DateTime"]) >= input$daterange[1] & as.Date(ts_tz()[,"DateTime"]) <= input$daterange[2]
+    site_idx <- ts_tz()[,"SiteName"] %in% input$sitename
+    para_idx <- ts_tz()[,"ParameterName"] %in%  input$parameter2
     row_idx <- date_idx & site_idx & para_idx
-    ts_tz_agg()[row_idx, c("DateTime",
+    ts_tz()[row_idx, c("DateTime",
                                   "measurementID",
                                   "SiteName",
                                   "ParameterName",
@@ -219,28 +219,28 @@ ui_timeSeries <- function(...) {
                            z-index: 105;
 }
 ")),
-      selectInput("timezone", label = "Select a timezone",
-                  choices = aquanes.report::get_valid_timezones()$TZ.,
-                  selected = "UTC"),
       selectInput("temporal_aggregation", label = "Select temporal aggregation",
-                  choices = c("raw", "hour", "day", "month"),
-                  selected = "raw"),
+                  choices = c("raw", "10min", "hour", "day"),
+                  selected = "10min"),
+      selectInput("timezone", label = "Select a timezone",
+                  choices = c("UTC", "Asia/Calcutta"),#aquanes.report::get_valid_timezones()$TZ.,
+                  selected = "UTC"),
       dateRangeInput('daterange',
                      label = 'Date range input: yyyy-mm-dd',
                      start = "2016-09-05",
                      end = "2016-10-31"),
       selectInput("sitename", label = "Select a sampling point",
-                  choices = unique(haridwar_raw_list$SiteName),
+                  choices = unique(haridwar_10min_list$SiteName),
                   multiple = TRUE,
-                  selected = unique(haridwar_raw_list$SiteName)),
+                  selected = unique(haridwar_10min_list$SiteName)),
       selectInput("parameter1", label = "Select a parameter(s) for plot 1",
-                  choices = unique(haridwar_raw_list$ParameterName),
+                  choices = unique(haridwar_10min_list$ParameterName),
                   multiple = TRUE,
-                  selected = unique(haridwar_raw_list$ParameterName)[c(3,4,24)]),
+                  selected = unique(haridwar_10min_list$ParameterName)[c(16)]),
       selectInput("parameter2", label = "Select a parameter(s) for plot 2",
-                  choices = unique(haridwar_raw_list$ParameterName),
+                  choices = unique(haridwar_10min_list$ParameterName),
                   multiple = TRUE,
-                  selected = unique(haridwar_raw_list$ParameterName)[c(30)]),
+                  selected = unique(haridwar_10min_list$ParameterName)[c(30)]),
       downloadButton("report", "Download plot"),
       selectInput("dataset", "Choose a dataset to download:",
                   choices = c("data_plot1", "data_plot2")),

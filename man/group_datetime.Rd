@@ -4,14 +4,14 @@
 \alias{group_datetime}
 \title{Group DateTime by user defined period (year, month, day, hour, minute)}
 \usage{
-group_datetime(df, by = "day", fun = "median", col_datetime = "DateTime",
-  col_datatype = "DataType")
+group_datetime(df, by = 600, fun = "median", col_datetime = "DateTime",
+  col_datatype = "DataType", dbg = TRUE)
 }
 \arguments{
 \item{df}{a data frame as retrieved by import_data_haridwar()}
 
-\item{by}{an aggregation time step of "year", "month", "day", "hour", "minute"
-(default: "day)}
+\item{by}{an aggregation time step in seconds (default: 600 seconds) for intra-
+day aggregation or "day", "month" or "year" for longer time spans}
 
 \item{fun}{function to be used for grouping measurement data of column ParameterValue
 (default: median)
@@ -20,6 +20,8 @@ group_datetime(df, by = "day", fun = "median", col_datetime = "DateTime",
 \item{col_datetime}{column name of datetime column (default: DateTime)}
 
 \item{col_datatype}{column name of data type column (default: DateType)}
+
+\item{dbg}{print debug information}
 }
 \value{
 returns data frame with data aggregated according to user defined
