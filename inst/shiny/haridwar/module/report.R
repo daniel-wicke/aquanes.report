@@ -46,24 +46,34 @@ server_report <- function(...) {
 
 
   report_agg <- reactive({
+    
+    withProgress(message = sprintf("1. Loading %s data", input$report_aggregation), 
+                 value = 0, { 
 
     object_name <- sprintf("haridwar_%s_list", input$report_aggregation)
 
-    if (exists(object_name)) {
-      get(object_name)
-    } else {
+    if (!exists(object_name)) {
       dat <- readRDS(sprintf("data/%s.Rds", object_name))
       assign(x = object_name,
              value = dat)
-      dat
+     
     }
-
+    incProgress(amount = 1,message = "Completed!")
+  
+    })
+   get(object_name)
   })
 
 
   report_tz <- reactive({
+    
+    # withProgress(message = sprintf("Changing time zone to %s", 
+    #                                 input$report_timezone), 
+    #              value = 0.3)
+    # 
     aquanes.report::change_timezone(df = report_agg(),
                                     tz = input$report_timezone)
+
   })
 
 
