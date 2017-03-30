@@ -137,7 +137,6 @@ level (i.e. median values): "`r config$report_aggregation`"
                                    scales = "free_y",
                                    page = i) +
       ggplot2::geom_point() +
-      ggplot2::geom_line() +
       ggplot2::theme_bw() +
       ggplot2::theme(legend.position = "top")
      print(g1) 
@@ -177,6 +176,7 @@ level (i.e. median values): "`r config$report_aggregation`"
                                    scales = "free_y",
                                    page = i) +
       ggplot2::geom_point() +
+      ggplot2::geom_line() +
       ggplot2::theme_bw() +
       ggplot2::theme(legend.position = "top")
      print(g2) 

@@ -3,7 +3,7 @@ Type: Package
 Title: Automated Reporting Tool for Water Suppliers
 Version: 0.2.9999
 Author: Michael Rustler
-Maintainer: Michael Rustler <michael.rustler@kompetenz-wasser.det>
+Maintainer: Michael Rustler <michael.rustler@kompetenz-wasser.de>
 Description: Collects, aggregates and visualises operational and 
     analytical data from water suppliers (including a standardised 
 	reporting document).
