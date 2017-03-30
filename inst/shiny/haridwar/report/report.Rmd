@@ -137,8 +137,10 @@ level (i.e. median values): "`r config$report_aggregation`"
                                    scales = "free_y",
                                    page = i) +
       ggplot2::geom_point() +
-      ggplot2::theme_bw() +
-      ggplot2::theme(legend.position = "top")
+      ggplot2::theme_bw(base_size = 20) +
+      ggplot2::theme(legend.position = "top"
+                     , strip.text.x = element_text(size = 20, face = "bold")
+                     )
      print(g1) 
     }
     }
@@ -177,9 +179,13 @@ level (i.e. median values): "`r config$report_aggregation`"
                                    page = i) +
       ggplot2::geom_point() +
       ggplot2::geom_line() +
-      ggplot2::theme_bw() +
-      ggplot2::theme(legend.position = "top")
-     print(g2) 
+      ggplot2::theme_bw(base_size = 20) +
+      ggplot2::theme(legend.position = "top" 
+                     , strip.text.x = element_text(size = 20, face = "bold")
+                     #, axis.title = element_text(colour="black", size = 20)
+                     #, axis.text = element_text(colour="black", size = 20)
+                     )
+    print(g2) 
     }
     }
 ```
